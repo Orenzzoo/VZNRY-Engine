@@ -2,6 +2,11 @@
 
 Internal tool for Visionary Studios: product link or custom brief → finished video ads. React 18 + Vite + React Router, plain CSS. No backend yet; every page holds its own sample data at the top of the file.
 
+## Project docs (read these first)
+Full context lives in `docs/`. Start with `docs/README.md`, then read the file that matches the task:
+product overview, user flows, AI pipeline, data model, design system, roadmap, decisions log, glossary.
+When you make a product decision, add it to `docs/07-decisions.md`.
+
 ## Commands
 - `npm run dev`: local server on http://localhost:5173
 - `npm run build`: production build; run it after changes to catch errors
