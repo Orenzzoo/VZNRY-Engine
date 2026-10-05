@@ -26,5 +26,8 @@ When you make a product decision, add it to `docs/07-decisions.md`.
 - Step 7 is **Deliver**, not Publish. Client review link is the default route; publishing to our own channels is optional.
 - Clients review on `/review/:roundId`: no login, no sidebar, approve / request changes / timestamped comments per video.
 - Characters that are real people require signed consent before they can be saved.
-- Brief examples: Dollar Tree Secrets (AI presenter series, promo in the middle) and the pillow animation (promo at the end). The selected example is kept in the URL as `?ex=`.
+- Briefs start blank or from a **sample** (Dollar Tree Secrets, Pillow animation, AI drama, Singing video, Brainrot edit). Samples only pre-fill the form; they are not fixed options. "What kind of video?" is an open list: people can add their own type. The starting point is kept in the URL as `?ex=` (default `blank`). Data lives in `src/pages/briefExamples.jsx`.
+- `/` is the Home dashboard (needs attention, output, in progress). The product flow starts at `/product/new`. `/buyers` is the Buyers workspace page (same research screen without the product stepper).
+- Sidebar top is the app header (logo + wordmark, links home); the signed-in account lives in the top bar (dummy: Renz). The brand switcher ("Working on") is a dropdown; picking a brand doesn't filter sample data yet.
+- Motion: shared easing tokens `--ease` / `--ease-out` in `styles.css`. Page content fades up with a stagger, the active nav highlight slides, and a lime bar sweeps the top on page change. For content that swaps in place, add `.anim-in` (or `.stagger` on a list) and give it a React `key` so it replays. All motion is turned off under `prefers-reduced-motion`.
 - The bug report posts to Slack channel `#engine-bugs` (placeholder name; mocked for now).

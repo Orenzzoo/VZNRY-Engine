@@ -84,7 +84,7 @@ export default function Library() {
       <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
         <section className="stack" style={{ flex: '999 1 520px', minWidth: 0, gap: 10 }}>
           <span className="faint" style={{ fontSize: 13 }}>Showing {shown.length} of {CLIPS.length} recent clips</span>
-          <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))' }}>
+          <div key={status + brand} className="grid-auto stagger" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(170px, 100%), 1fr))' }}>
             {shown.map((c) => {
               const picked = !!picks[c.id];
               return (
@@ -112,7 +112,7 @@ export default function Library() {
           {!shown.length && <div className="card faint" style={{ padding: 24, fontSize: 14, textAlign: 'center' }}>No clips match these filters.</div>}
         </section>
 
-        <aside className="card stack" style={{ flex: '1 1 320px', minWidth: 0, padding: 18, gap: 16 }}>
+        <aside key={sel.id} className="card stack anim-in" style={{ flex: '1 1 320px', minWidth: 0, padding: 18, gap: 16 }}>
           <div className="row" style={{ gap: 14, alignItems: 'flex-start' }}>
             <div className="row" style={{ flex: 'none', width: 96, height: 170, borderRadius: 12, background: sel.bg, border: '1px solid var(--line-3)', justifyContent: 'center' }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon.play size={16} /></div>

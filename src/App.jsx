@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 
+import Home from './pages/Home.jsx';
 import NewProduct from './pages/NewProduct.jsx';
 import BrandKit from './pages/BrandKit.jsx';
 import Research from './pages/Research.jsx';
@@ -31,8 +32,10 @@ export default function App() {
     <>
       <ScrollToTop />
       <Routes>
+        <Route path="/" element={<Home />} />
+
         {/* Product flow, steps 1–7 */}
-        <Route path="/" element={<NewProduct />} />
+        <Route path="/product/new" element={<NewProduct />} />
         <Route path="/product/brand-kit" element={<BrandKit />} />
         <Route path="/product/research" element={<Research />} />
         <Route path="/product/formats" element={<Formats />} />
@@ -53,6 +56,7 @@ export default function App() {
         <Route path="/review-queue" element={<ReviewQueue />} />
         <Route path="/client-reviews" element={<ClientReviews />} />
         <Route path="/library" element={<Library />} />
+        <Route path="/buyers" element={<Research standalone />} />
 
         {/* What the client sees from a review link (no sidebar) */}
         <Route path="/review/:roundId" element={<ClientReview />} />

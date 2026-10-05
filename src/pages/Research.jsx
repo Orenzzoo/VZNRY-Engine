@@ -21,16 +21,28 @@ const PERSONAS = [
   { init: 'LS', bg: '#1C2A40', fg: '#93C5FD', name: 'The lapsed salon regular', who: 'Quit gels over cost or damage', wants: 'the salon look without the bill.', worries: 'damage at removal.', angle: 'removal reassurance', share: 31 }
 ];
 
-export default function Research() {
+// Also used as the "Buyers" workspace page (/buyers): same research, without the product-step framing.
+export default function Research({ standalone = false }) {
   const [filter, setFilter] = useState('all');
+  const [product, setProduct] = useState('Red Alert');
   const [pins, setPins] = useState({ p1: true, p3: true });
   const shown = PHRASES.filter((p) => filter === 'all' || p.type === filter);
   const pinCount = Object.values(pins).filter(Boolean).length;
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip']} screen="Buyer research" guide>
-      <Stepper current={2} />
-      <PageHead eyebrow="Step 03 · Research" title="What buyers actually say." lede="Before writing a single ad, the engine reads what real people say about products like this one, so your ads sound like a buyer talking, not like an ad." />
+    <Layout section={standalone ? 'Buyers' : 'Products'} crumbs={standalone ? ['Moyou London', 'Buyers'] : ['Moyou London', 'Red Alert Gel Nail Strip']} screen="Buyer research" guide>
+      {!standalone && <Stepper current={2} />}
+      <PageHead
+        eyebrow={standalone ? 'Workspace · Buyers' : 'Step 03 · Research'}
+        title="What buyers actually say."
+        lede={standalone ? 'Everything the engine has learned about who buys this brand and why, in their own words. It updates every week from comments and reviews.' : "Before writing a single ad, the engine reads what real people say about products like this one, so your ads sound like a buyer talking, not like an ad."}
+        right={standalone && (
+          <div className="stack" style={{ gap: 6 }}>
+            <span className="faint" style={{ fontSize: 12 }}>Product</span>
+            <div className="segs" role="group" aria-label="Product">{['Red Alert', 'Too Hot To Handle', 'Periwinkle'].map((p) => <button key={p} type="button" className={'seg' + (product === p ? ' on' : '')} aria-pressed={product === p} onClick={() => setProduct(p)}>{p}</button>)}</div>
+          </div>
+        )}
+      />
 
       <Guide title="What is research for? How it turns into your ads">
         <div className="stack" style={{ padding: '2px 16px 18px', gap: 14 }}>
@@ -63,7 +75,7 @@ export default function Research() {
           <span className="pill lime">Refreshes weekly</span>
         </div>
         <div className="row" style={{ height: 10, borderRadius: 10, overflow: 'hidden', gap: 3 }}>
-          {SOURCES.map(([n, v, c]) => <div key={n} style={{ flex: v, background: c, minWidth: 6, height: '100%' }} />)}
+          {SOURCES.map(([n, v, c]) => <div key={n} className="grow-x" style={{ flex: v, background: c, minWidth: 6, height: '100%' }} />)}
         </div>
         <div className="row wrap" style={{ gap: 20, fontSize: 13 }}>
           {SOURCES.map(([n, v, c]) => <span key={n} className="row" style={{ gap: 8 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: c }} />{n} <span className="mono faint">{v.toLocaleString()}</span></span>)}
@@ -86,6 +98,7 @@ export default function Research() {
               ))}
             </div>
           </div>
+          <div key={filter} className="stagger">
           {shown.map((p) => {
             const on = !!pins[p.id];
             return (
@@ -102,6 +115,7 @@ export default function Research() {
               </div>
             );
           })}
+          </div>
         </section>
 
         <aside className="stack" style={{ flex: '1 1 300px', minWidth: 0, gap: 14 }}>
@@ -122,17 +136,24 @@ export default function Research() {
               </div>
               <div className="stack" style={{ gap: 6 }}>
                 <div className="row between" style={{ fontSize: 12 }}><span className="faint">Share of signals</span><span className="mono">{p.share}%</span></div>
-                <div style={{ height: 6, borderRadius: 6, background: 'var(--line)' }}><div style={{ width: p.share + '%', height: '100%', borderRadius: 6, background: 'var(--lime)' }} /></div>
+                <div className="progress" style={{ height: 6 }}><span className="grow-x" style={{ width: p.share + '%' }} /></div>
               </div>
             </div>
           ))}
         </aside>
       </div>
 
-      <div className="row wrap between" style={{ gap: 12 }}>
-        <Link className="btn" to="/product/brand-kit">Back</Link>
-        <Link className="btn primary" to="/product/formats">Choose formats <Icon.arrow /></Link>
-      </div>
+      {standalone ? (
+        <div className="row wrap between" style={{ gap: 12 }}>
+          <span className="muted" style={{ fontSize: 14 }}>Pinned lines are used first in every new batch for this product.</span>
+          <Link className="btn primary" to="/product/formats">Make ads from this research <Icon.arrow /></Link>
+        </div>
+      ) : (
+        <div className="row wrap between" style={{ gap: 12 }}>
+          <Link className="btn" to="/product/brand-kit">Back</Link>
+          <Link className="btn primary" to="/product/formats">Choose formats <Icon.arrow /></Link>
+        </div>
+      )}
     </Layout>
   );
 }

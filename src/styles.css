@@ -179,5 +179,123 @@ textarea.in { min-height: 96px; resize: vertical; line-height: 1.5; }
   .top { padding: 12px 16px; }
   .h1 { font-size: 32px; }
   .side { max-width: none; }
-  .search { min-width: 0; flex: 1; }
+  .search { min-width: 0; flex: 1 1 100%; }
+  .search span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-btn .acct-name { display: none; }
+}
+
+/* ───────── Motion ─────────
+   One easing curve everywhere so the app feels like one thing moving. */
+:root { --ease: cubic-bezier(.22, .61, .36, 1); --ease-out: cubic-bezier(.16, 1, .3, 1); }
+
+/* Smooth state changes on everything clickable */
+.btn, .mini, .chip, .seg, .tag, .pill, .pick, .list-row, .nav, .toggle-row, .drop, .in, .field, .box, .st .bar, .st, .menu-item, .icon-btn, .brand-btn {
+  transition: background-color .22s var(--ease), border-color .22s var(--ease), color .22s var(--ease), box-shadow .25s var(--ease), transform .18s var(--ease), opacity .22s var(--ease);
+}
+.btn:active, .chip:active, .seg:active, .mini:active, .icon-btn:active { transform: scale(.97); }
+.pick:hover { transform: translateY(-2px); }
+.pick:active { transform: translateY(0) scale(.99); }
+
+/* Page enter: content fades up, children stagger in */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { from { opacity: 0; transform: translateY(-6px) scale(.97); } to { opacity: 1; transform: none; } }
+.content > * { animation: rise .5s var(--ease-out) both; }
+.content > *:nth-child(2) { animation-delay: .04s; }
+.content > *:nth-child(3) { animation-delay: .08s; }
+.content > *:nth-child(4) { animation-delay: .12s; }
+.content > *:nth-child(5) { animation-delay: .16s; }
+.content > *:nth-child(6) { animation-delay: .2s; }
+.content > *:nth-child(n+7) { animation-delay: .24s; }
+.top { animation: fade .3s var(--ease) both; }
+/* Animated page sections form their own layers, so the bars that own dropdowns must sit above them */
+.top { position: relative; z-index: 30; }
+.side { position: relative; z-index: 20; }
+
+/* Use on anything that swaps content in place (give it a React key so it replays) */
+.anim-in { animation: rise .38s var(--ease-out) both; }
+.anim-fade { animation: fade .3s var(--ease) both; }
+.stagger > * { animation: rise .42s var(--ease-out) both; }
+.stagger > *:nth-child(2) { animation-delay: .03s; }
+.stagger > *:nth-child(3) { animation-delay: .06s; }
+.stagger > *:nth-child(4) { animation-delay: .09s; }
+.stagger > *:nth-child(5) { animation-delay: .12s; }
+.stagger > *:nth-child(6) { animation-delay: .15s; }
+.stagger > *:nth-child(n+7) { animation-delay: .18s; }
+
+/* Route progress bar: thin lime line across the top while a page changes */
+.route-bar { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100; pointer-events: none; transform-origin: left; background: linear-gradient(90deg, var(--lime), var(--lime-hover)); box-shadow: 0 0 10px rgba(198,244,50,0.6); animation: route .6s var(--ease-out) forwards; }
+@keyframes route { 0% { transform: scaleX(0); opacity: 1; } 70% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+/* Sidebar: active highlight slides between items */
+.nav-list { position: relative; }
+.nav-list .nav, .nav-list .nav.on { position: relative; z-index: 1; background: transparent; box-shadow: none; }
+.nav-list .nav:hover { background: rgba(255,255,255,0.03); }
+.nav-glow { position: absolute; left: 0; right: 0; top: 0; height: 42px; border-radius: 10px; background: #1A1A20; box-shadow: inset 0 0 0 1px var(--line-3); z-index: 0; pointer-events: none; transition: transform .42s var(--ease-out), opacity .2s; }
+.nav-glow::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: var(--lime); }
+.nav svg { transition: color .22s var(--ease); }
+
+/* Guide panel opens smoothly */
+.guide .chev { transition: transform .3s var(--ease); }
+.guide[open] > :not(summary) { animation: rise .35s var(--ease-out) both; }
+
+/* Loading: skeleton shimmer and progress bars */
+.skel { position: relative; overflow: hidden; background: #16161B; }
+.skel::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent); animation: shimmer 1.3s infinite; }
+@keyframes shimmer { to { transform: translateX(100%); } }
+.progress { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.progress > span { display: block; height: 100%; border-radius: 4px; background: var(--lime); transition: width .7s var(--ease-out); }
+.grow-x { transform-origin: left; animation: growx .9s var(--ease-out) both; }
+@keyframes growx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-y { transform-origin: bottom; animation: growy .8s var(--ease-out) both; }
+@keyframes growy { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+
+/* ───────── App header (logo) and account ───────── */
+.side { padding-top: 0; }
+.side-head { display: flex; align-items: center; gap: 11px; min-height: 63px; margin: 0 -12px; padding: 0 20px; border-bottom: 1px solid #1F1F25; text-decoration: none; color: var(--text); }
+.side-head:hover { color: var(--text); }
+.side-head img { transition: transform .45s var(--ease-out); }
+.side-head:hover img { transform: rotate(-8deg) scale(1.06); }
+.wordmark { display: flex; flex-direction: column; gap: 3px; line-height: 1; }
+.wordmark b { font-size: 16px; font-weight: 700; letter-spacing: .04em; }
+.wordmark span { font-family: var(--mono); font-size: 10px; letter-spacing: .32em; color: var(--lime); }
+.icon-btn { position: relative; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #23232A; background: #131317; color: var(--muted); cursor: pointer; }
+.icon-btn:hover { color: var(--text); border-color: #3A3A42; }
+.icon-btn .dot { position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 2px #131317; }
+.avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 600; color: #0B0B0F; }
+.acct-btn { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 10px 0 4px; border-radius: 999px; border: 1px solid #23232A; background: #131317; color: var(--text); cursor: pointer; transition: border-color .22s var(--ease), background-color .22s var(--ease); }
+.acct-btn:hover, .acct-btn[aria-expanded="true"] { border-color: #3A3A42; background: #18181D; }
+
+/* Dropdown menus (brand switcher, account) */
+.menu-wrap { position: relative; }
+.menu { position: absolute; z-index: 60; top: calc(100% + 8px); min-width: 270px; padding: 6px; border-radius: 14px; background: #141418; border: 1px solid var(--line-3); box-shadow: 0 20px 50px rgba(0,0,0,0.55); transform-origin: top; animation: pop .22s var(--ease-out) both; }
+.menu.right { right: 0; transform-origin: top right; }
+.menu.full { left: 0; right: 0; min-width: 0; }
+.menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 10px; border: 0; border-radius: 9px; background: transparent; color: var(--text); font-size: 14px; text-align: left; cursor: pointer; text-decoration: none; }
+.menu-item:hover, .menu-item:focus-visible { background: #1E1E24; color: var(--text); }
+.menu-item.on { background: rgba(198,244,50,0.07); }
+.menu-sep { height: 1px; margin: 6px 4px; background: var(--line); }
+.menu-label { padding: 8px 10px 4px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.brand-btn { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 50px; padding: 0 10px; border-radius: 11px; background: #131317; border: 1px solid #23232A; color: var(--text); font-size: 14px; cursor: pointer; text-align: left; }
+.brand-btn:hover, .brand-btn[aria-expanded="true"] { border-color: #3A3A42; background: #17171C; }
+.brand-btn .chev { transition: transform .25s var(--ease); }
+.brand-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+/* Home */
+.stat { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; text-decoration: none; color: var(--text); transition: border-color .25s var(--ease), transform .25s var(--ease); }
+a.stat:hover { border-color: #3A3A42; transform: translateY(-2px); color: var(--text); }
+.stat .num { font-family: var(--mono); font-size: 38px; font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
+.hero-glow { position: relative; overflow: hidden; }
+.hero-glow::before { content: ""; position: absolute; width: 520px; height: 520px; right: -160px; top: -300px; border-radius: 50%; background: radial-gradient(circle, rgba(198,244,50,0.14), transparent 62%); pointer-events: none; }
+.bar-col { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+.bar-col .b { width: 100%; max-width: 34px; border-radius: 4px 4px 0 0; background: #4B5E1A; transition: background-color .2s var(--ease); }
+.bar-col.now .b { background: var(--lime); }
+.bar-col:hover .b { background: var(--lime-hover); }
+.bar-col .tip { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, 4px); opacity: 0; padding: 4px 8px; border-radius: 7px; background: #1E1E24; border: 1px solid var(--line-3); font-size: 12px; white-space: nowrap; pointer-events: none; transition: opacity .15s, transform .15s var(--ease); z-index: 2; }
+.bar-col:hover .tip { opacity: 1; transform: translate(-50%, -4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

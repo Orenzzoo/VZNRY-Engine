@@ -53,7 +53,7 @@ export default function ReviewQueue() {
             <div style={{ minWidth: 640 }}>
               <div className="th" style={{ gridTemplateColumns: COLS }}><span>Batch</span><span>Waiting</span><span>Quality</span><span>Since</span><span>Reviewer</span></div>
               {shown.map((b) => (
-                <button key={b.id} type="button" className={'list-row' + (b.id === selId ? ' on' : '')} style={{ gridTemplateColumns: COLS }} onClick={() => setSelId(b.id)}>
+                <button key={b.id} type="button" className={'list-row anim-in' + (b.id === selId ? ' on' : '')} style={{ gridTemplateColumns: COLS }} onClick={() => setSelId(b.id)}>
                   <span className="row" style={{ gap: 12, minWidth: 0 }}>
                     <span style={{ flex: 'none', width: 10, height: 10, borderRadius: 3, background: b.dot }} />
                     <span className="stack" style={{ gap: 3, minWidth: 0 }}><span style={{ fontWeight: 600 }}>{b.product}</span><span className="faint" style={{ fontSize: 12 }}>{b.brand} · {b.batch}</span></span>
@@ -69,7 +69,7 @@ export default function ReviewQueue() {
           </div>
         </section>
 
-        <aside className="card stack" style={{ flex: '1 1 340px', minWidth: 0, padding: 20, gap: 16 }}>
+        <aside key={selId} className="card stack anim-in" style={{ flex: '1 1 340px', minWidth: 0, padding: 20, gap: 16 }}>
           <div className="stack" style={{ gap: 4 }}>
             <span className="faint" style={{ fontSize: 12 }}>{sel.brand} · {sel.batch}</span>
             <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em' }}>{sel.product}</h2>

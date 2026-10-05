@@ -59,7 +59,7 @@ export default function ClientReviews() {
         <section className="card" style={{ flex: '999 1 560px', minWidth: 0, overflow: 'hidden' }}>
           <div className="row between" style={{ padding: '14px 18px' }}><h2 style={{ fontSize: 16, fontWeight: 600 }}>Review rounds</h2><span className="faint" style={{ fontSize: 13 }}>{shown.length} shown</span></div>
           {shown.map((r) => (
-            <div key={r.id} className="stack" style={{ gap: 12, padding: '16px 18px', borderTop: '1px solid var(--line)' }}>
+            <div key={r.id} className="stack anim-in" style={{ gap: 12, padding: '16px 18px', borderTop: '1px solid var(--line)' }}>
               <div className="row wrap between" style={{ alignItems: 'flex-start', gap: 10 }}>
                 <div className="row" style={{ gap: 12, minWidth: 0 }}>
                   <span style={{ flex: 'none', width: 10, height: 10, borderRadius: 3, background: r.dot }} />

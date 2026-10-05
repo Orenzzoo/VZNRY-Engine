@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
 import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
@@ -20,6 +20,16 @@ const TYPE = {
   train: { type: 'Training', cls: 'amber', rights: 'Consent on file', rightsCls: 'green' }
 };
 const REF_LABELS = ['Front', 'Three-quarter', 'Side', 'Full body'];
+// Looks the generator "returns". Replace with real image generation results.
+const GEN_LOOKS = [
+  { scene: '#2E2A3A', skin: '#D9A982', shirt: '#5B4A8A' },
+  { scene: '#2A3530', skin: '#8D5B3E', shirt: '#3E6B5A' },
+  { scene: '#3A2C24', skin: '#F0CDB0', shirt: '#A35D3D' },
+  { scene: '#1F2B38', skin: '#B07A55', shirt: '#2F4F6F' }
+];
+const VIBES = ['Warm', 'Deadpan', 'High energy', 'Calm', 'Funny', 'Luxury'];
+const AGES = ['20s', '30s', '40s', '60+'];
+const VOICES = ['Bright, British', 'Warm, American', 'Dry, American', 'Soft, Southern US'];
 
 function Portrait({ c, small }) {
   if (c.photo) return <img src={c.photo} alt={c.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />;
@@ -40,7 +50,22 @@ export default function Characters() {
   const [added, setAdded] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selId, setSelId] = useState('mia');
-  const [adding, setAdding] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const [mode, setModeRaw] = useState(params.get('new') === 'generate' ? 'generate' : 'view'); // view | upload | generate
+  const adding = mode === 'upload';
+  const setMode = (m) => { setModeRaw(m); if (params.get('new')) setParams({}, { replace: true }); };
+  const setAdding = (on) => setMode(on ? 'upload' : 'view');
+  // Generate flow
+  const [gKind, setGKind] = useState('real');
+  const [gPrompt, setGPrompt] = useState('');
+  const [gAge, setGAge] = useState('30s');
+  const [gVibe, setGVibe] = useState('Warm');
+  const [gVoice, setGVoice] = useState('Warm, American');
+  const [gState, setGState] = useState('idle'); // idle | loading | ready
+  const [gPick, setGPick] = useState(null);
+  const [gName, setGName] = useState('');
+  const gTimer = useRef(null);
+  useEffect(() => () => clearTimeout(gTimer.current), []);
   const [draftName, setDraftName] = useState('');
   const [files, setFiles] = useState([]);
   const [consent, setConsent] = useState(false);
@@ -52,6 +77,23 @@ export default function Characters() {
 
   // Previews stay in the browser. In the real build: upload photos + voice, store the signed consent form, then start training.
   const onFiles = (e) => setFiles(Array.from(e.target.files || []).slice(0, 4).map((f) => URL.createObjectURL(f)));
+  // Simulated generation. Replace with the real image model call.
+  const generate = () => {
+    clearTimeout(gTimer.current);
+    setGState('loading'); setGPick(null);
+    gTimer.current = setTimeout(() => setGState('ready'), 1800);
+  };
+  const resetGen = () => { setGState('idle'); setGPick(null); setGName(''); setGPrompt(''); };
+  const canSaveGen = gPick != null && gName.trim().length > 0;
+  const saveGen = () => {
+    if (!canSaveGen) return;
+    const id = 'gen' + (added.length + 1);
+    const look = GEN_LOOKS[gPick];
+    const anim = gKind === 'anim';
+    setAdded(added.concat([{ id, name: gName.trim(), kind: anim ? 'anim' : 'ai', fresh: true, ...look, vibe: gPrompt.trim() || `${gVibe} ${anim ? 'animated character' : 'presenter, ' + gAge}.`, voice: anim ? 'No voice · sound effects only' : `${gVoice} · library voice`, consistency: '0%', note: 'Just generated. 4 test shots run automatically to check the face stays the same.', usedIn: 'Not used yet', brands: 'All brands' }]));
+    setSelId(id); setMode('view'); resetGen();
+  };
+
   const save = () => {
     if (!canSave) return;
     const id = 'new' + (added.length + 1);
@@ -65,15 +107,20 @@ export default function Characters() {
         eyebrow="Workspace · Characters"
         title="Your cast, ready for any ad."
         lede="Upload a person, generate an AI presenter or add an animated character. Each one is locked with reference images and a voice, so they look and sound the same in every video."
-        right={<button type="button" className="btn primary" onClick={() => setAdding(true)}><Icon.upload />Upload character</button>}
+        right={
+          <div className="row wrap" style={{ gap: 10 }}>
+            <button type="button" className="btn" onClick={() => setAdding(true)}><Icon.upload />Upload a real person</button>
+            <button type="button" className="btn primary" onClick={() => setMode('generate')}><Icon.wand />Generate character</button>
+          </div>
+        }
       />
 
       <Guide
         title="How this page works"
         items={[
           ["What it's for", 'Everyone and everything that can appear in our ads, across all brands.'],
-          ['What you do', 'Click a character to check its photos, voice and rights. To add someone, press "Upload character": 4 photos, a voice sample, and signed consent if it\'s a real person.'],
-          ['What happens next', 'New characters train for about 10 minutes, then appear in Look and cast and on the Formats step.']
+          ['What you do', 'Click a character to check its photos, voice and rights. To make a new one, press "Generate character" and describe who you want, or "Upload a real person" with 4 photos and signed consent.'],
+          ['What happens next', 'Generated characters are ready in about 20 seconds; uploaded people train for about 10 minutes. Both then appear in Look and cast and on the Formats step.']
         ]}
         terms={<><span><b>Match %</b> = how often test shots look like the reference photos. Above 90% is reliable.</span><span><b>AI-generated</b> = not a real person. <b>Uploaded</b> = a real person, consent required.</span></>}
       />
@@ -83,23 +130,91 @@ export default function Characters() {
       </div>
 
       <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
-        <section className="grid-auto" style={{ flex: '999 1 520px', minWidth: 0, gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))' }}>
+        <section key={filter} className="grid-auto stagger" style={{ flex: '999 1 520px', minWidth: 0, gridTemplateColumns: 'repeat(auto-fill, minmax(min(170px, 100%), 1fr))' }}>
+          {(filter === 'all' || filter === 'ai' || filter === 'anim') && (
+            <button type="button" className={'pick' + (mode === 'generate' ? ' on' : '')} onClick={() => setMode('generate')} style={{ padding: '8px 8px 12px', gap: 10, borderStyle: 'dashed', background: 'transparent' }}>
+              <span className="stack" style={{ height: 190, borderRadius: 11, alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(198,244,50,0.04)', color: 'var(--lime)' }}>
+                <span className="row" style={{ justifyContent: 'center', width: 48, height: 48, borderRadius: 14, background: 'rgba(198,244,50,0.12)' }}><Icon.wand size={22} /></span>
+                <span className="faint" style={{ fontSize: 12, textAlign: 'center', padding: '0 12px', lineHeight: 1.4 }}>Describe a person or mascot, get 4 options</span>
+              </span>
+              <span className="stack" style={{ gap: 4, padding: '0 4px' }}>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>Generate character</span>
+                <span className="faint" style={{ fontSize: 12 }}>AI-generated · about 20 s</span>
+              </span>
+            </button>
+          )}
           {shown.map((c) => (
-            <button key={c.id} type="button" className={'pick' + (c.id === selId && !adding ? ' on' : '')} style={{ padding: '8px 8px 12px', gap: 10 }} aria-pressed={c.id === selId} onClick={() => { setSelId(c.id); setAdding(false); }}>
+            <button key={c.id} type="button" className={'pick' + (c.id === selId && mode === 'view' ? ' on' : '')} style={{ padding: '8px 8px 12px', gap: 10 }} aria-pressed={c.id === selId} onClick={() => { setSelId(c.id); setMode('view'); }}>
               <span style={{ display: 'block', height: 190, borderRadius: 11, background: c.scene, position: 'relative', overflow: 'hidden' }}>
                 <Portrait c={c} />
                 <span className={'pill ' + TYPE[c.kind].cls} style={{ position: 'absolute', left: 8, top: 8, background: 'rgba(11,11,15,0.75)' }}>{TYPE[c.kind].type}</span>
               </span>
               <span className="stack" style={{ gap: 4, padding: '0 4px' }}>
                 <span style={{ fontSize: 15, fontWeight: 600 }}>{c.name}</span>
-                <span className="faint" style={{ fontSize: 12 }}>{c.brands}{c.kind === 'train' ? ' · training' : ` · ${c.consistency} match`}</span>
+                <span className="faint" style={{ fontSize: 12 }}>{c.brands}{c.kind === 'train' ? ' · training' : c.fresh ? ' · just generated' : ` · ${c.consistency} match`}</span>
               </span>
             </button>
           ))}
         </section>
 
-        <aside className="card stack" style={{ flex: '1 1 340px', minWidth: 0, padding: 20, gap: 18 }}>
-          {adding ? (
+        <aside key={mode + (mode === 'view' ? sel.id : '')} className="card stack anim-in" style={{ flex: '1 1 340px', minWidth: 0, padding: 20, gap: 18 }}>
+          {mode === 'generate' ? (
+            <>
+              <div className="row between"><h2 style={{ fontSize: 18, fontWeight: 600 }}>Generate a character</h2><button type="button" className="btn" style={{ minHeight: 40 }} onClick={() => { setMode('view'); resetGen(); }}>Cancel</button></div>
+              <div className="stack" style={{ gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>What kind?</span>
+                <div className="segs" role="group" aria-label="Kind of character">{[['real', 'Realistic person'], ['anim', 'Animated mascot']].map(([id, l]) => <button key={id} type="button" className={'seg' + (gKind === id ? ' on' : '')} aria-pressed={gKind === id} onClick={() => { setGKind(id); setGState('idle'); setGPick(null); }}>{l}</button>)}</div>
+              </div>
+              <div className="stack" style={{ gap: 8 }}>
+                <label htmlFor="g-prompt" style={{ fontSize: 13, fontWeight: 600 }}>Describe them</label>
+                <textarea id="g-prompt" className="in" value={gPrompt} onChange={(e) => setGPrompt(e.target.value)} style={{ minHeight: 88, fontSize: 14 }}
+                  placeholder={gKind === 'anim' ? 'e.g. A sleepy cloud with tiny arms, soft pastel colours, always yawning.' : 'e.g. Friendly woman, curly hair, cosy cardigan, kitchen background. Feels like a friend giving tips.'} />
+              </div>
+              {gKind === 'real' && (
+                <div className="stack" style={{ gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Age</span>
+                  <div className="segs" role="group" aria-label="Age">{AGES.map((a) => <button key={a} type="button" className={'seg' + (gAge === a ? ' on' : '')} aria-pressed={gAge === a} onClick={() => setGAge(a)}>{a}</button>)}</div>
+                </div>
+              )}
+              <div className="stack" style={{ gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Vibe</span>
+                <div className="row wrap" style={{ gap: 6 }}>{VIBES.map((x) => <button key={x} type="button" className={'chip' + (gVibe === x ? ' on' : '')} style={{ minHeight: 34, fontSize: 12 }} aria-pressed={gVibe === x} onClick={() => setGVibe(x)}>{x}</button>)}</div>
+              </div>
+              {gKind === 'real' && (
+                <div className="stack" style={{ gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Voice</span>
+                  <div className="row wrap" style={{ gap: 6 }}>{VOICES.map((x) => <button key={x} type="button" className={'chip' + (gVoice === x ? ' on' : '')} style={{ minHeight: 34, fontSize: 12 }} aria-pressed={gVoice === x} onClick={() => setGVoice(x)}>{x}</button>)}</div>
+                </div>
+              )}
+              <button type="button" className={'btn ' + (gState === 'loading' ? 'off' : gState === 'ready' ? 'sm' : 'primary')} style={{ minHeight: 44 }} onClick={() => gState !== 'loading' && generate()}>
+                {gState === 'loading' ? <><svg className="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M20 12a8 8 0 0 0-8-8" /></svg>Generating 4 options…</> : gState === 'ready' ? <><Icon.sparkle />Generate 4 more</> : <><Icon.sparkle />Generate 4 options</>}
+              </button>
+              {gState !== 'idle' && (
+                <div className="stack" style={{ gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{gState === 'loading' ? 'Creating options…' : 'Pick one'}</span>
+                  <div className="grid-auto stagger" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                    {GEN_LOOKS.map((look, i) => gState === 'loading' ? (
+                      <div key={'s' + i} className="skel" style={{ aspectRatio: '3 / 4', borderRadius: 12 }} />
+                    ) : (
+                      <button key={'o' + i} type="button" className={'pick' + (gPick === i ? ' on' : '')} aria-pressed={gPick === i} aria-label={`Option ${i + 1}`} onClick={() => setGPick(i)} style={{ padding: 4, borderRadius: 14 }}>
+                        <span style={{ display: 'block', aspectRatio: '3 / 4', borderRadius: 10, background: look.scene, position: 'relative', overflow: 'hidden' }}>
+                          <Portrait c={{ ...look, kind: gKind === 'anim' ? 'anim' : 'ai' }} />
+                          <span className="pill mono" style={{ position: 'absolute', left: 6, top: 6, background: 'rgba(11,11,15,0.7)', fontSize: 11 }}>{i + 1}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {gState === 'ready' && (
+                <div className="stack anim-in" style={{ gap: 12 }}>
+                  <div className="stack" style={{ gap: 8 }}><label htmlFor="g-name" style={{ fontSize: 13, fontWeight: 600 }}>Name</label><input id="g-name" className="in" value={gName} onChange={(e) => setGName(e.target.value)} placeholder={gKind === 'anim' ? 'e.g. Cloudy' : 'e.g. Jess, 32'} /></div>
+                  <span className="hint"><Icon.info size={14} />Generated people are not real, so no consent form is needed. Test shots run after saving.</span>
+                  <button type="button" className={'btn ' + (canSaveGen ? 'primary' : 'off')} onClick={saveGen}>{gPick == null ? 'Pick an option first' : !gName.trim() ? 'Add a name to save' : 'Save character'}</button>
+                </div>
+              )}
+            </>
+          ) : adding ? (
             <>
               <div className="row between"><h2 style={{ fontSize: 18, fontWeight: 600 }}>Upload a character</h2><button type="button" className="btn" style={{ minHeight: 40 }} onClick={() => setAdding(false)}>Cancel</button></div>
               <div className="stack" style={{ gap: 8 }}><label htmlFor="c-name" style={{ fontSize: 13, fontWeight: 600 }}>Name</label><input id="c-name" className="in" value={draftName} onChange={(e) => setDraftName(e.target.value)} placeholder="e.g. Jess, 27" /></div>

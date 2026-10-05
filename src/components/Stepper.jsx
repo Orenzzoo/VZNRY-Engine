@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 export const PRODUCT_STEPS = [
-  { to: '/', label: 'Link' },
+  { to: '/product/new', label: 'Link' },
   { to: '/product/brand-kit', label: 'Brand kit' },
   { to: '/product/research', label: 'Research' },
   { to: '/product/formats', label: 'Formats' },

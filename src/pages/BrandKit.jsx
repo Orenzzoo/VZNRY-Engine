@@ -226,7 +226,7 @@ export default function BrandKit() {
       </div>
 
       <div className="row wrap between" style={{ gap: 12 }}>
-        <Link className="btn" to="/">Back</Link>
+        <Link className="btn" to="/product/new">Back</Link>
         <Link className="btn primary" to="/product/research">Continue to research <Icon.arrow /></Link>
       </div>
     </Layout>

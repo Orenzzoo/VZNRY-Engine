@@ -81,7 +81,7 @@ export default function Recipes() {
                 <span>Recipe</span><span title="Share of generated shots that pass the automatic quality check">QA pass ⓘ</span><span title="Share of viewers still watching after 3 seconds">Hold rate ⓘ</span><span>Uses</span><span>Status</span>
               </div>
               {shown.map((r) => (
-                <button key={r.id} type="button" className={'list-row' + (r.id === id ? ' on' : '')} style={{ gridTemplateColumns: COLS }} onClick={() => setId(r.id)}>
+                <button key={r.id} type="button" className={'list-row anim-in' + (r.id === id ? ' on' : '')} style={{ gridTemplateColumns: COLS }} onClick={() => setId(r.id)}>
                   <span className="row" style={{ gap: 12, minWidth: 0 }}>
                     <span style={{ flex: 'none', width: 34, height: 48, borderRadius: 7, background: r.thumb, border: '1px solid var(--line-3)' }} />
                     <span className="stack" style={{ gap: 3, minWidth: 0 }}><span style={{ fontWeight: 600 }}>{r.name}</span><span className="faint" style={{ fontSize: 12 }}>by {r.owner} · tuned {r.tuned}</span></span>
@@ -94,7 +94,7 @@ export default function Recipes() {
           </div>
         </section>
 
-        <aside className="card stack" style={{ flex: '1 1 340px', minWidth: 0, padding: 22, gap: 18 }}>
+        <aside key={id} className="card stack anim-in" style={{ flex: '1 1 340px', minWidth: 0, padding: 22, gap: 18 }}>
           <div className="stack" style={{ gap: 6 }}>
             <div className="row between" style={{ gap: 10 }}><h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em' }}>{sel.name}</h2><span className={'pill ' + sel.statusCls}>{sel.status}</span></div>
             <span className="muted" style={{ fontSize: 14, lineHeight: 1.5 }}>{sel.about}</span>

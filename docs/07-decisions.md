@@ -4,6 +4,12 @@ Newest first. Add an entry whenever something is decided on purpose, so nobody u
 
 | Date | Decision | Why |
 | --- | --- | --- |
+| 2026-10-05 | Home dashboard at `/`; product flow moved to `/product/new`. | People need one place that shows what needs them today (client-declined videos, overdue reviews, output). |
+| 2026-10-05 | Buyers gets its own route (`/buyers`) instead of linking into product step 3. | Clicking Buyers highlighted Products, which was confusing. |
+| 2026-10-05 | Brief examples are optional samples, not a two-way switch; video type is an open list with "Add your own". | The team makes many kinds of video (AI drama, singing, brainrot…); two fixed examples felt limiting. |
+| 2026-10-05 | Characters can be generated (describe → 4 options → pick and name), not only uploaded. | "AI-generated" characters need a way to be made in the tool. |
+| 2026-10-05 | Logo is a proper app header; account (dummy) sits in the top bar with a menu. | The logo row looked like the logged-in account. |
+| 2026-10-05 | Smooth transitions throughout, one easing curve, respects reduced motion. | Switching felt abrupt; motion should show what changed. |
 | 2026-10-05 | Project docs live in `docs/` as Markdown; `CLAUDE.md` points to them. | Gives AI tools and new teammates the same context. |
 | 2026-10-05 | Front end built as React + Vite + React Router, plain CSS with tokens. | Simple, fast, easy for AI tools to edit; no framework lock-in for the backend. |
 | 2026-10-05 | Name: **VZNRY Engine**, using the VZNRY logo. | Matches the company brand. |

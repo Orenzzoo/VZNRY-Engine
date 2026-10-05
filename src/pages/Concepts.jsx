@@ -4,14 +4,14 @@ import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper, { BRIEF_STEPS } from '../components/Stepper.jsx';
 import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
-import { EXAMPLES, ExampleSwitch, useExample } from './briefExamples.jsx';
+import { EXAMPLES, BriefSource, useExample } from './briefExamples.jsx';
 
 const STATUS_CLS = { Verified: 'green', 'Needs check': 'amber', 'Varies by store': 'amber', 'Ask client': 'amber', Blocked: 'red' };
 
 export default function Concepts() {
-  const [exId, setExId] = useExample();
+  const [exId] = useExample();
   const ex = EXAMPLES[exId];
-  const [picksAll, setPicksAll] = useState({ dt: EXAMPLES.dt.defaultPicks, pl: EXAMPLES.pl.defaultPicks });
+  const [picksAll, setPicksAll] = useState(() => Object.fromEntries(Object.entries(EXAMPLES).map(([id, e]) => [id, e.defaultPicks])));
   const [verAll, setVerAll] = useState({});
   const picks = picksAll[exId];
   const ver = verAll[exId] || {};
@@ -20,7 +20,9 @@ export default function Concepts() {
   return (
     <Layout section="Briefs" crumbs={['Briefs', ex.name]} screen="Concept board" brand={{ name: ex.client, color: ex.dot }} guide>
       <Stepper steps={BRIEF_STEPS.map((s) => ({ ...s, to: s.to.startsWith('/briefs') ? `${s.to}?ex=${exId}` : s.to }))} current={1} />
-      <PageHead eyebrow="Briefs · Step 02" title="Pick the episodes to make." lede="Script options written from your brief. Every one keeps the same locked promo segment; only the story changes." right={<ExampleSwitch value={exId} onChange={setExId} />} />
+      <PageHead eyebrow="Briefs · Step 02" title="Pick the episodes to make." lede="Script options written from your brief. Every one keeps the same locked promo segment; only the story changes." right={<BriefSource exId={exId} />} />
+
+      {ex.empty && <div className="notice">This brief is still blank, so these are empty slots. <Link to="/briefs/new?ex=blank" style={{ fontWeight: 600 }}>Add your idea to the brief</Link> and the engine writes 10–20 real options here.</div>}
 
       <Guide
         items={[
@@ -41,7 +43,7 @@ export default function Concepts() {
       <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
         <section className="stack" style={{ flex: '999 1 540px', minWidth: 0, gap: 12 }}>
           <div className="row between"><h2 className="h2">{ex.conceptsTitle}</h2><span className="faint" style={{ fontSize: 13 }}>{selCount} of {ex.concepts.length} selected</span></div>
-          <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+          <div className="grid-auto stagger" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))' }}>
             {ex.concepts.map((c) => {
               const on = !!picks[c.id];
               return (

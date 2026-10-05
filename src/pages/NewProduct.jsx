@@ -89,27 +89,28 @@ export default function NewProduct() {
       </div>
 
       {step >= 0 && (
-        <div className="card stack" style={{ padding: '22px 24px', gap: 4, maxWidth: 900 }}>
-          <div className="row between" style={{ marginBottom: 8 }}>
+        <div className="card stack anim-in" style={{ padding: '22px 24px', gap: 4, maxWidth: 900 }}>
+          <div className="row between" style={{ marginBottom: 10 }}>
             <h2 className="h2">Setting up Red Alert Gel Nail Strip</h2>
             <span className="mono faint" style={{ fontSize: 12 }}>{Math.min(step, 4)} of 4</span>
           </div>
+          <div className="progress" style={{ marginBottom: 10 }}><span style={{ width: `${Math.max(4, (Math.min(step + (step < 4 ? 0.5 : 0), 4) / 4) * 100)}%` }} /></div>
           {STEPS.map((s, i) => {
             const done = step > i, running = step === i;
             return (
               <div key={s.label} className="row" style={{ gap: 14, padding: '14px 0', borderTop: '1px solid var(--line)' }}>
-                {done && <div style={{ flex: 'none', width: 28, height: 28, borderRadius: '50%', background: 'var(--lime)', color: '#0B0B0F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon.check size={15} sw={3} /></div>}
+                {done && <div className="anim-fade" style={{ flex: 'none', width: 28, height: 28, borderRadius: '50%', background: 'var(--lime)', color: '#0B0B0F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon.check size={15} sw={3} /></div>}
                 {running && <div style={{ flex: 'none', width: 28, height: 28, borderRadius: '50%', background: 'rgba(198,244,50,0.1)', color: 'var(--lime)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg className="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M20 12a8 8 0 0 0-8-8" /></svg></div>}
                 {!done && !running && <div style={{ flex: 'none', width: 28, height: 28, borderRadius: '50%', border: '1px dashed #3A3A42' }} />}
                 <div className="stack" style={{ gap: 2 }}>
                   <span style={{ fontSize: 15, fontWeight: 500 }}>{s.label}</span>
-                  <span className="muted" style={{ fontSize: 13 }}>{done ? s.done : running ? s.running : 'Waiting'}</span>
+                  <span key={done ? 'd' : running ? 'r' : 'w'} className={'muted anim-fade' + (running ? ' pulse' : '')} style={{ fontSize: 13 }}>{done ? s.done : running ? s.running : 'Waiting'}</span>
                 </div>
               </div>
             );
           })}
           {step >= 4 && (
-            <div className="row wrap between" style={{ gap: 12, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
+            <div className="row wrap between anim-in" style={{ gap: 12, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
               <span className="muted" style={{ fontSize: 14 }}>Ready to check. Most people only fix one or two things.</span>
               <Link className="btn primary" to="/product/brand-kit">Review brand kit <Icon.arrow /></Link>
             </div>

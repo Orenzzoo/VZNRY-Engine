@@ -4,7 +4,7 @@ import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper, { BRIEF_STEPS } from '../components/Stepper.jsx';
 import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
-import { EXAMPLES, ExampleSwitch, useExample } from './briefExamples.jsx';
+import { EXAMPLES, BriefSource, useExample } from './briefExamples.jsx';
 
 const PRESENTERS = [
   { id: 'tasha', name: 'Tasha, 34', vibe: 'Warm, chatty, feels like a friend letting you in on something', tag: 'Most used', scene: '#2B3A2E', skin: '#9C6B4E', shirt: '#3F6B4A' },
@@ -33,9 +33,11 @@ function Pillow({ s, w = 128, h = 84, gap = 14, ew = 8, eh = 8, tf = 'none' }) {
 }
 
 export default function Cast() {
-  const [exId, setExId] = useExample();
+  const [exId] = useExample();
   const ex = EXAMPLES[exId];
-  const isDT = exId === 'dt';
+  const isDT = ex.style !== 'anim'; // presenter-style briefs cast a person; animated ones lock a look
+  const picked = Object.values(ex.defaultPicks).filter(Boolean).length;
+  const firstLine = ex.beats[0][1].replace(/^"|"$/g, '');
   const [pid, setPid] = useState('tasha');
   const [voice, setVoice] = useState('warm');
   const [sid, setSid] = useState('clay');
@@ -50,13 +52,13 @@ export default function Cast() {
         eyebrow="Briefs · Step 03"
         title={isDT ? 'Cast the face of the series.' : 'Lock the look before any video.'}
         lede={isDT ? 'Pick one presenter and voice. They stay the same across every episode, so viewers start to recognise them.' : 'Animation drifts when the style isn’t fixed. Approve a style frame and a character sheet first; every shot is built from them.'}
-        right={<ExampleSwitch value={exId} onChange={setExId} />}
+        right={<BriefSource exId={exId} />}
       />
 
       <Guide
         items={[
           ["What it's for", 'Locking who or what appears, so every video in the series looks like the same world.'],
-          ['What you do', 'Presenter series: pick one presenter and a voice. Animation: pick a style, then approve the character sheet. Switch examples at the top right to see both.'],
+          ['What you do', 'Presenter series: pick one presenter and a voice. Animation: pick a style, then approve the character sheet.'],
           ['What happens next', 'Your choice is used as the reference image in every shot, then the scripts go to the Director.']
         ]}
         terms={<><span><b>Style frame</b> = one still picture showing the look before any video is made.</span><span><b>Character sheet</b> = the character drawn in several poses, so it never changes shape between shots.</span></>}
@@ -65,7 +67,7 @@ export default function Cast() {
       {isDT ? (
         <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
           <section className="stack" style={{ flex: '999 1 540px', minWidth: 0, gap: 12 }}>
-            <div className="row between"><h2 className="h2">Presenter</h2><Link className="btn" to="/characters" style={{ minHeight: 40 }}><Icon.plus size={15} />Create new character</Link></div>
+            <div className="row between"><h2 className="h2">Presenter</h2><Link className="btn" to="/characters?new=generate" style={{ minHeight: 40 }}><Icon.wand />Generate a new presenter</Link></div>
             <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
               {PRESENTERS.map((p) => (
                 <button key={p.id} type="button" className={'pick' + (p.id === pid ? ' on' : '')} aria-pressed={p.id === pid} onClick={() => setPid(p.id)}>
@@ -92,7 +94,7 @@ export default function Cast() {
             <div className="sub stack" style={{ padding: 14, gap: 8 }}><span className="faint" style={{ fontSize: 12 }}>Consistency</span><span style={{ fontSize: 14, lineHeight: 1.5 }}>{chosen.name} is locked with 6 reference images and one cloned voice, so every episode shows the same person.</span></div>
             <div className="sub stack" style={{ padding: 14, gap: 8 }}>
               <span className="faint" style={{ fontSize: 12 }}>Line read preview</span>
-              <span style={{ fontSize: 15, lineHeight: 1.45 }}>"Dollar Tree workers won't tell you this…"</span>
+              <span style={{ fontSize: 15, lineHeight: 1.45 }}>"{firstLine}"</span>
               <button type="button" className="btn" style={{ alignSelf: 'flex-start', minHeight: 40 }}><Icon.play size={14} />Play sample</button>
             </div>
           </aside>
@@ -112,7 +114,7 @@ export default function Cast() {
           </section>
           <section className="card stack" style={{ padding: 20, gap: 16 }}>
             <div className="row wrap between" style={{ gap: 10 }}>
-              <div className="stack" style={{ gap: 4 }}><h2 className="h2">2. Approve the character sheet</h2><span className="muted" style={{ fontSize: 13 }}>Every shot in every video uses these poses as references, so the pillow never changes shape or colour.</span></div>
+              <div className="stack" style={{ gap: 4 }}><h2 className="h2">2. Approve the character sheet</h2><span className="muted" style={{ fontSize: 13 }}>Every shot in every video uses these poses as references, so the character never changes shape or colour.</span></div>
               <span className={'pill' + (approved ? ' green' : '')}>{approved ? 'Approved' : 'Waiting for approval'}</span>
             </div>
             <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
@@ -133,7 +135,7 @@ export default function Cast() {
 
       <div className="row wrap between" style={{ gap: 12 }}>
         <Link className="btn" to={`/briefs/concepts?ex=${exId}`}>Back to concepts</Link>
-        <Link className="btn primary" to="/product/director">{isDT ? 'Send 3 episodes to Director' : 'Send 2 stories to Director'} <Icon.arrow /></Link>
+        <Link className="btn primary" to="/product/director">Send {picked || 'your'} {ex.conceptsTitle.toLowerCase()} to Director <Icon.arrow /></Link>
       </div>
     </Layout>
   );
