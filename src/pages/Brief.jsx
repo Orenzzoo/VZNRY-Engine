@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper, { BRIEF_STEPS } from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 import { EXAMPLES, StartFrom, VIDEO_TYPES, useExample } from './briefExamples.jsx';
 
@@ -16,12 +15,63 @@ const PLACEHOLDERS = {
 };
 const SEG_COLORS = { hook: ['#F4F4F5', '#0B0B0F'], story: ['#2A2A31', '#F4F4F5'], promo: ['#C6F432', '#0B0B0F'] };
 
+const BEAT_TEXT = { hook: 'Hook: the first line, written from your idea', story: 'Story: changes each episode', promo: 'Promo / CTA: made once, reused' };
+
 function segments(L, place) {
   const s = (label, secs, kind) => ({ label, secs, kind });
   if (place === 'end') return [s('Hook', 3, 'hook'), s('Story', L - 7, 'story'), s('Promo', 4, 'promo')];
   if (place === 'mid') { const a = Math.floor((L - 7) / 2); return [s('Hook', 3, 'hook'), s('Story', a, 'story'), s('Promo', 4, 'promo'), s('Story', L - 7 - a, 'story')]; }
   const a = Math.floor((L - 9) / 2);
   return [s('Hook', 3, 'hook'), s('Story', a, 'story'), s('Promo', 3, 'promo'), s('Story', L - 9 - a, 'story'), s('Promo', 3, 'promo')];
+}
+
+// The ad's timeline. Handles between parts can be dragged (or moved with arrow keys) in 1-second steps; every part keeps at least 1 s.
+function AdStructure({ segs, len, onChange }) {
+  const bar = useRef(null);
+  const drag = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const secs = segs.map((g) => g.secs);
+  const move = (i, start, d) => {
+    const step = Math.max(1 - start[i], Math.min(start[i + 1] - 1, d));
+    const next = start.slice();
+    next[i] += step; next[i + 1] -= step;
+    onChange(next);
+  };
+  const down = (i) => (e) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { i, x: e.clientX, start: secs, width: bar.current.getBoundingClientRect().width };
+    setDragging(true);
+  };
+  const moveTo = (e) => {
+    const d = drag.current;
+    if (!d) return;
+    move(d.i, d.start, Math.round(((e.clientX - d.x) / d.width) * len));
+  };
+  const up = () => { drag.current = null; setDragging(false); };
+  const key = (i) => (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); move(i, secs, -1); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); move(i, secs, 1); }
+  };
+  let at = 0;
+  return (
+    <div ref={bar} className="row" style={{ height: 56, userSelect: 'none', touchAction: 'none' }}>
+      {segs.map((g, i) => {
+        at += g.secs;
+        return (
+          <span key={i} style={{ display: 'contents' }}>
+            <div className="stack anim-fade" style={{ flex: g.secs, minWidth: 0, transition: dragging ? 'none' : 'flex .35s var(--ease-out)', height: '100%', borderRadius: 9, background: SEG_COLORS[g.kind][0], color: SEG_COLORS[g.kind][1], alignItems: 'center', justifyContent: 'center', gap: 2, overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 2px' }}>
+              <span style={{ fontSize: 11, fontWeight: 600 }}>{g.label}</span><span className="mono" style={{ fontSize: 10, opacity: 0.8 }}>{g.secs}s</span>
+            </div>
+            {i < segs.length - 1 && (
+              <span role="slider" tabIndex={0} className="seg-handle" aria-label={`Boundary between ${g.label} and ${segs[i + 1].label}`} aria-valuemin={1} aria-valuemax={len - 1} aria-valuenow={at} aria-valuetext={`${g.label} ends at ${at} seconds`}
+                onPointerDown={down(i)} onPointerMove={moveTo} onPointerUp={up} onPointerCancel={up} onKeyDown={key(i)} title="Drag to change the timing" />
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function Brief() {
@@ -41,25 +91,21 @@ export default function Brief() {
     if (t) { if (!types.includes(t)) setTypes(types.concat(t)); set('format', t); }
     setNewType(''); setAddingType(false);
   };
-  const segs = segments(v.len, v.place);
+  // Timing of each part. Starts from the default split for the length and promo placement; dragging the handles changes it.
+  const splitKey = `${v.len}|${v.place}`;
+  const [splits, setSplits] = useState({});
+  const defaults = segments(v.len, v.place);
+  const segs = defaults.map((g, i) => ({ ...g, secs: (splits[exId + splitKey] || defaults.map((d) => d.secs))[i] }));
+  const custom = !!splits[exId + splitKey];
+  const setSecs = (arr) => setSplits({ ...splits, [exId + splitKey]: arr });
 
   return (
-    <Layout section="Briefs" crumbs={['Briefs', v.name]} screen="New brief" brand={{ name: base.client, color: base.dot }} guide>
-      <Stepper steps={BRIEF_STEPS.map((s) => ({ ...s, to: s.to.startsWith('/briefs') ? `${s.to}?ex=${exId}` : s.to }))} current={0} />
+    <Layout section="Custom videos" crumbs={['Custom videos', v.name]} screen="Custom video idea" brand={{ name: base.client, color: base.dot }}>
+      <Stepper steps={BRIEF_STEPS.map((s) => ({ ...s, to: `${s.to}?ex=${exId}` }))} current={0} />
       <PageHead
         eyebrow="Briefs · Step 01"
-        title="No product page? Write a brief."
+        title="Make a custom video."
         lede="For any video that doesn't start from a product page: a presenter series, an AI drama, a song, a brainrot edit, whatever you have in mind. Describe it in plain words. The engine plans the rest."
-      />
-
-      <Guide
-        title="When to use a brief, and how"
-        items={[
-          ["What it's for", "Any video that doesn't come from a product page: a presenter series, an animation, an AI drama, a song, a meme edit. If the kind you want isn't listed, add your own."],
-          ['What you do', 'Start blank or from a sample, pick what kind of video it is (or add your own), describe the idea, then pick a style, length and where the promo goes.'],
-          ['What happens next', 'The engine writes 10–20 script options. You pick the ones to make on the next screen.']
-        ]}
-        terms={<><span><b>Sample</b> = a filled-in brief to learn from. It is not a template you have to follow.</span><span><b>Promo, locked</b> = the part that advertises the product. It's made once and reused unchanged in every episode.</span><span><b>Series</b> = keeps the same character and look, so the next episode is one click.</span></>}
       />
 
       <StartFrom value={exId} onChange={setExId} />
@@ -81,7 +127,7 @@ export default function Brief() {
             </div>
           </div>
           <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-            <div className="stack" style={{ gap: 8 }}><label htmlFor="b-name" style={{ fontSize: 13, fontWeight: 600 }}>Brief name</label><input id="b-name" className="in" {...field('name')} /></div>
+            <div className="stack" style={{ gap: 8 }}><label htmlFor="b-name" style={{ fontSize: 13, fontWeight: 600 }}>Video name</label><input id="b-name" className="in" {...field('name')} /></div>
             <div className="stack" style={{ gap: 8 }}><label htmlFor="b-what" style={{ fontSize: 13, fontWeight: 600 }}>What are we promoting?</label><input id="b-what" className="in" {...field('what')} /></div>
           </div>
           <div className="stack" style={{ gap: 8 }}>
@@ -117,21 +163,25 @@ export default function Brief() {
         <aside className="stack" style={{ flex: '1 1 340px', minWidth: 0, gap: 14 }}>
           <div className="card stack" style={{ padding: 20, gap: 16 }}>
             <div className="row between"><h2 style={{ fontSize: 16, fontWeight: 600 }}>Ad structure</h2><span className="mono faint" style={{ fontSize: 12 }}>{v.len} seconds</span></div>
-            <div className="row" style={{ gap: 4, height: 52 }}>
-              {segs.map((g, i) => (
-                <div key={i} className="stack anim-fade" style={{ flex: g.secs, transition: 'flex .4s var(--ease-out)', height: '100%', borderRadius: 9, background: SEG_COLORS[g.kind][0], color: SEG_COLORS[g.kind][1], alignItems: 'center', justifyContent: 'center', gap: 2, overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600 }}>{g.label}</span><span className="mono" style={{ fontSize: 10, opacity: 0.8 }}>{g.secs}s</span>
-                </div>
-              ))}
+            <AdStructure segs={segs} len={v.len} onChange={setSecs} />
+            <div className="row wrap between" style={{ gap: 8 }}>
+              <span className="faint" style={{ fontSize: 12 }}>Drag the handles between parts to change the timing.</span>
+              {custom && <button type="button" className="mini anim-fade" onClick={() => { const n = { ...splits }; delete n[exId + splitKey]; setSplits(n); }}>Reset timing</button>}
             </div>
             <div className="row wrap faint" style={{ gap: 14, fontSize: 12 }}>
               <span className="row" style={{ gap: 6 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#F4F4F5' }} />Hook</span>
               <span className="row" style={{ gap: 6 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#2A2A31', border: '1px solid #3A3A42' }} />Story, changes each episode</span>
-              <span className="row" style={{ gap: 6 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--lime)' }} />Promo, locked</span>
+              <span className="row" style={{ gap: 6 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--lime)' }} />Promo / CTA, locked</span>
             </div>
             <div className="sub stack" style={{ padding: 14, gap: 8 }}>
-              <span className="faint" style={{ fontSize: 12 }}>{base.sample ? `Beats from the ${base.label} sample` : 'How the beats will look'}</span>
-              {base.beats.map(([t, text]) => <div key={t} className="row" style={{ gap: 10, fontSize: 13, lineHeight: 1.45, alignItems: 'flex-start' }}><span className="mono faint" style={{ flex: 'none', width: 52 }}>{t}</span><span>{text}</span></div>)}
+              <span className="faint" style={{ fontSize: 12 }}>How the beats will look</span>
+              {segs.reduce((acc, g, i) => {
+                const start = acc.t;
+                acc.t += g.secs;
+                const text = g.kind === 'hook' && base.sample ? base.beats[0][1] : BEAT_TEXT[g.kind];
+                acc.rows.push(<div key={i} className="row" style={{ gap: 10, fontSize: 13, lineHeight: 1.45, alignItems: 'flex-start' }}><span className="mono faint" style={{ flex: 'none', width: 60 }}>{start}–{acc.t}s</span><span>{text}</span></div>);
+                return acc;
+              }, { t: 0, rows: [] }).rows}
             </div>
           </div>
           <div className="card stack" style={{ padding: 20, gap: 12 }}>
@@ -140,7 +190,7 @@ export default function Brief() {
               <div key={i} className="row" style={{ gap: 10, fontSize: 14, lineHeight: 1.45, alignItems: 'flex-start' }}><span className="mono" style={{ color: 'var(--lime)' }}>{i + 1}</span><span>{t}</span></div>
             ))}
           </div>
-          <Link className="btn primary" to={`/briefs/concepts?ex=${exId}`} style={{ minHeight: 52 }}>Generate concepts <Icon.arrow /></Link>
+          <Link className="btn primary" to={`/custom/episodes?ex=${exId}`} style={{ minHeight: 52 }}>Suggest episodes <Icon.arrow /></Link>
         </aside>
       </div>
     </Layout>

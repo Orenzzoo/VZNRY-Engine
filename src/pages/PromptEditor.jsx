@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const DEFAULT = [
@@ -82,17 +81,8 @@ export default function PromptEditor() {
   if (note.trim()) tweaks.push(['note', 'Product note → ' + note.trim(), 'Your note for this product.']);
 
   return (
-    <Layout section="Recipes" crumbs={['Recipes', name]} guide>
+    <Layout section="Recipes" crumbs={['Recipes', name]}>
       <PageHead eyebrow="Recipes · Prompt editor" title="Bring your own prompt format." lede="Write the prompt the way you like it, with blanks the engine fills for each product. Then choose: run it exactly as written, or let the engine tweak it per product and show you every change." />
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", 'Using a prompt you already trust instead of a built-in recipe.'],
-          ['What you do', 'Write your prompt. Where product details should go, use a blank like {product}; click a blank below to insert it. Then pick "exactly as written" or "tweak per product".'],
-          ['What happens next', 'Test it on 3 products, then save it. It appears in Recipes and on the Formats step like any other format.']
-        ]}
-        terms={<><span><b>Blank</b> = a {'{word}'} the engine fills for each product. Blue in the preview.</span><span><b>!</b> at the start of a line locks it so it's never changed.</span><span><b>Tweak</b> = a change the engine made for one product. Lime in the preview, with the reason.</span></>}
-      />
 
       <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
         <section className="card stack" style={{ flex: '999 1 520px', minWidth: 0, padding: 22, gap: 20 }}>

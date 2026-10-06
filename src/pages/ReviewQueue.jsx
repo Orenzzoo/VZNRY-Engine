@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
 
 const BATCHES = [
   { id: 'b1', brand: 'Moyou London', dot: '#C8102E', product: 'Red Alert Gel Nail Strip', batch: 'Batch 4', waiting: 6, qa: 92, since: '2 h', sinceCls: '', overdue: false, note: 'client round due Thu', tints: ['#3B2A22', '#24252C', '#4A0F18', '#33281F', '#3A2E2B', '#1E2638'] },
@@ -21,17 +20,8 @@ export default function ReviewQueue() {
   const mine = BATCHES.filter((b) => assign[b.id] === 'You').reduce((a, b) => a + b.waiting, 0);
 
   return (
-    <Layout section="Review queue" crumbs={['Visionary Studios', 'Review queue']} brand={{ name: 'All brands', color: 'var(--lime)' }} guide>
+    <Layout section="Review queue" crumbs={['Visionary Studios', 'Review queue']} brand={{ name: 'All brands', color: 'var(--lime)' }}>
       <PageHead eyebrow="Workspace · Review queue" title="Everything waiting for a look." lede="Every generated video that passed the automatic checks and now needs a person to keep or skip it, across all brands." />
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", 'One place to see all review work, so nothing sits unchecked before a client deadline.'],
-          ['What you do', 'Click a batch to preview it and assign it. Press "Start reviewing" to go through it with Keep and Skip.'],
-          ['What happens next', 'Kept videos move to Client reviews or the Library. Skips go back to be remade.']
-        ]}
-        terms={<><span><b>Waiting</b> = time since the batch finished generating.</span><span><b>Overdue</b> = waiting more than 2 days, or a client deadline is close.</span></>}
-      />
 
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
         {[['Videos waiting', '19', 'in 5 batches'], ['Assigned to you', String(mine), 'videos'], ['Oldest waiting', '3 days', 'Dollar Tree Secrets', '#FCA5A5'], ['Avg. quality score ⓘ', '91', 'out of 100']].map(([l, v, s, c]) => (

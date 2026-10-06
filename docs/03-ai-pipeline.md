@@ -7,14 +7,15 @@ This is the core of the product. The goal: one click produces output that's good
 ## Stages
 
 ```
-Link or brief
+Link or brief                                   (researcher)
   → 1. Brand kit (scrape + extract)
   → 2. Research (voice of customer, personas)
-  → 3. Recipe chosen per piece
+  → Hand off to an editor as a task               (researcher → editor)
+  → 3. Format (recipe) or custom prompt chosen in Generate   (editor)
   → 4. Director: script → shot list → model-specific prompts
   → 5. Generate candidates per shot
   → 6. Automatic quality check (pick best, regenerate failures)
-  → 7. Assemble (stitch, captions, sizes, music)
+  → 7. Assemble: stitch approved hooks × cores × CTAs (or the master cut), captions, sizes, music
   → 8. Human review → client review → deliver
   → 9. Learn (skip reasons, client feedback, ad performance)
 ```
@@ -81,4 +82,4 @@ Users edit at script or shot level in plain language ("make shot 2 messier"); on
 **Open question.** The video model landscape changes monthly; pick per shot type after testing. Categories needed: text/image-to-video, avatar + lip-sync, text-to-speech + voice cloning, image generation, background removal, vision model for QA, LLM for research, scripts, shot lists and prompt tweaks. Keep models behind an adapter so they can be swapped without touching recipes.
 
 ## Cost
-Show estimated cost before generating (Formats step) and actual spend per batch (Director). Track cost per finished ad and per model.
+Show estimated cost before generating (Generate step) and actual spend per batch (Director view). Track spend per task and per editor too. Track cost per finished ad and per model.

@@ -15,8 +15,9 @@ Context for anyone, human or AI, working on this project. Read the file that mat
 
 ## Current status
 
-- **Built:** front-end prototype (React + Vite). All 20 screens and their interactions work on sample data.
-- **Not built:** backend, database, auth, AI generation, storage, publishing, Slack. Everything marked *Planned* in these docs is a proposal, not a commitment.
+- **Built:** front-end prototype (React + Vite). Role-based: Researcher and Editor each have their own home, sidebar and flow; clients use review links. All screens and interactions work on sample data, and you can switch person from the account menu.
+- **How work flows:** Researcher researches a product → hands it off to an Editor → Editor generates, reviews and delivers → Client reviews. Details in `02-user-flows.md`.
+- **Not built:** backend, database, login and real permissions, AI generation, storage, publishing, Slack. Everything marked *Planned* in these docs is a proposal, not a commitment.
 
 ## Keeping these docs useful
 

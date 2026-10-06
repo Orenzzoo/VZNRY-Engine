@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper from '../components/Stepper.jsx';
-import Guide, { Hint } from '../components/Guide.jsx';
+import { Hint } from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
+import SourceLogo from '../components/SourceLogo.jsx';
 
 const PHRASES = [
   { id: 'p1', type: 'pain', text: 'My gels look amazing for a week, then I wreck my nails getting them off.', stage: 'Problem aware', source: 'Reddit', count: 'seen 214×' },
@@ -30,7 +31,7 @@ export default function Research({ standalone = false }) {
   const pinCount = Object.values(pins).filter(Boolean).length;
 
   return (
-    <Layout section={standalone ? 'Buyers' : 'Products'} crumbs={standalone ? ['Moyou London', 'Buyers'] : ['Moyou London', 'Red Alert Gel Nail Strip']} screen="Buyer research" guide>
+    <Layout section={standalone ? 'Buyers' : 'Products'} crumbs={standalone ? ['Moyou London', 'Buyers'] : ['Moyou London', 'Red Alert Gel Nail Strip']} screen="Buyer research">
       {!standalone && <Stepper current={2} />}
       <PageHead
         eyebrow={standalone ? 'Workspace · Buyers' : 'Step 03 · Research'}
@@ -44,31 +45,6 @@ export default function Research({ standalone = false }) {
         )}
       />
 
-      <Guide title="What is research for? How it turns into your ads">
-        <div className="stack" style={{ padding: '2px 16px 18px', gap: 14 }}>
-          <div className="flow">
-            {[['1 · Read', 'The engine reads thousands of comments and reviews about this kind of product.'], ['2 · Sort', 'It pulls out the lines people repeat: what annoys them, what they want, why they hesitate.'], ['3 · You pin (optional)', 'Pin the lines you like best. Pinned lines get used first.']].map(([k, v]) => (
-              <span key={k} style={{ display: 'contents' }}>
-                <div className="fstep"><span className="gk" style={{ margin: 0 }}>{k}</span><span className="gv">{v}</span></div>
-                <div className="farrow" aria-hidden="true"><Icon.arrow size={18} sw={2} /></div>
-              </span>
-            ))}
-            <div className="fstep" style={{ borderColor: 'rgba(198,244,50,0.35)' }}><span className="gk" style={{ margin: 0, color: 'var(--lime-hover)' }}>4 · Becomes your hook</span><span className="gv">The first line of an ad, in the buyer's own words. You'll see it in the Director's script.</span></div>
-          </div>
-          <div className="sub row wrap" style={{ padding: '14px 16px', gap: '10px 18px', fontSize: 14, lineHeight: 1.5 }}>
-            <span className="faint">Example</span>
-            <span>A Reddit comment says <span style={{ color: 'var(--text)' }}>"I wreck my nails getting them off"</span></span>
-            <Icon.arrow style={{ color: 'var(--faint)' }} />
-            <span>The ad opens with <span style={{ color: 'var(--lime-hover)' }}>"My gels look amazing for a week, then I wreck my nails getting them off."</span></span>
-          </div>
-          <div className="gterms">
-            <span><b>Do I need to do anything?</b> No. It runs by itself in about 3 minutes. Pinning is optional.</span>
-            <span><b>Awareness stage</b> = how ready the buyer is. Early-stage buyers get the problem first; ready buyers get proof first.</span>
-            <span><b>Persona</b> = a type of buyer. Each one gets its own ads.</span>
-          </div>
-        </div>
-      </Guide>
-
       <div className="card stack" style={{ padding: '22px 24px', gap: 16 }}>
         <div className="row wrap between" style={{ alignItems: 'baseline', gap: 12 }}>
           <div className="row" style={{ alignItems: 'baseline', gap: 12 }}><span className="mono" style={{ fontSize: 34, fontWeight: 500, letterSpacing: '-0.02em' }}>10,482</span><span className="muted" style={{ fontSize: 14 }}>comments and reviews read in 3 min 12 s · where they came from</span></div>
@@ -78,7 +54,7 @@ export default function Research({ standalone = false }) {
           {SOURCES.map(([n, v, c]) => <div key={n} className="grow-x" style={{ flex: v, background: c, minWidth: 6, height: '100%' }} />)}
         </div>
         <div className="row wrap" style={{ gap: 20, fontSize: 13 }}>
-          {SOURCES.map(([n, v, c]) => <span key={n} className="row" style={{ gap: 8 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: c }} />{n} <span className="mono faint">{v.toLocaleString()}</span></span>)}
+          {SOURCES.map(([n, v, c]) => <span key={n} className="row" style={{ gap: 8 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: c }} /><SourceLogo source={n} size={18} />{n} <span className="mono faint">{v.toLocaleString()}</span></span>)}
         </div>
       </div>
 
@@ -108,7 +84,7 @@ export default function Research({ standalone = false }) {
                   <div className="row wrap" style={{ gap: 8 }}>
                     <span className={'pill ' + TYPE[p.type][1]}>{TYPE[p.type][0]}</span>
                     <span className="pill" title="How ready this buyer is to buy. Early stages get problem-first hooks; later stages get proof-first hooks.">{p.stage}</span>
-                    <span className="faint" style={{ fontSize: 12 }}>{p.source} · {p.count}</span>
+                    <span className="row faint" style={{ gap: 6, fontSize: 12 }}><SourceLogo source={p.source} size={16} />{p.source} · {p.count}</span>
                   </div>
                 </div>
                 <button type="button" className={'btn sm' + (on ? ' primary' : '')} style={{ minHeight: 40 }} aria-pressed={on} onClick={() => setPins({ ...pins, [p.id]: !on })}><Icon.pin />{on ? 'Pinned' : 'Pin'}</button>
@@ -146,12 +122,12 @@ export default function Research({ standalone = false }) {
       {standalone ? (
         <div className="row wrap between" style={{ gap: 12 }}>
           <span className="muted" style={{ fontSize: 14 }}>Pinned lines are used first in every new batch for this product.</span>
-          <Link className="btn primary" to="/product/formats">Make ads from this research <Icon.arrow /></Link>
+          <Link className="btn primary" to="/product/handoff?pkg=red-alert">Assign to an editor <Icon.arrow /></Link>
         </div>
       ) : (
         <div className="row wrap between" style={{ gap: 12 }}>
           <Link className="btn" to="/product/brand-kit">Back</Link>
-          <Link className="btn primary" to="/product/formats">Choose formats <Icon.arrow /></Link>
+          <Link className="btn primary" to="/product/handoff?pkg=red-alert">Assign to an editor <Icon.arrow /></Link>
         </div>
       )}
     </Layout>

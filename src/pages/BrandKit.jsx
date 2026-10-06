@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
+import { EditText, TagList } from '../components/Editable.jsx';
 
 // Images scraped from the product page. `rec` = engine's recommendation to use it.
 const SCRAPED = [
@@ -20,6 +20,22 @@ const SCRAPED = [
 ];
 
 const RED = '#C8102E';
+
+// What the engine pulled from the page. Everything here can be edited until the kit is locked.
+const KIT = {
+  name: 'Red Alert Gel Nail Strip', category: 'Gel nail strips', price: '£12.99',
+  problem: 'A salon-style manicure without long application or damaging your nails at removal.',
+  claims: ['Salon-style finish at home', 'Applies in minutes', 'Peels off cleanly', 'Long-lasting wear'],
+  offer: '',
+  voice: ['Playful', 'Confident', 'Salon-savvy', 'British', 'Luxury', 'Clinical'],
+  voiceOn: ['Playful', 'Confident', 'Salon-savvy', 'British'],
+  soundsLike: 'Red that means business. Five minutes on the sofa, salon nails by dinner.',
+  neverLike: 'Revolutionary nail technology for the modern woman.',
+  colors: ['#C8102E', '#111111', '#F2D7D5', '#FFFFFF'],
+  avoid: ['press-on', 'cheap', 'fake nails'],
+  noClaims: ['Exact wear time in days', '"Strengthens nails"']
+};
+const HEX = /^#[0-9A-Fa-f]{6}$/;
 
 function ImageArt({ kind, src, label }) {
   if (kind === 'upload') return <img src={src} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
@@ -59,6 +75,10 @@ export default function BrandKit() {
   const [swap, setSwap] = useState({ i3: true });
   const [filter, setFilter] = useState('all');
   const [uploads, setUploads] = useState([]);
+  const [kit, setKit] = useState(KIT);
+  const edited = JSON.stringify(kit) !== JSON.stringify(KIT);
+  const put = (k) => (val) => setKit((prev) => ({ ...prev, [k]: val }));
+  const setColor = (i, c) => setKit((prev) => ({ ...prev, colors: prev.colors.map((x, j) => (j === i ? c.toUpperCase() : x)) }));
 
   const all = SCRAPED.concat(uploads.map((src, i) => ({ id: 'u' + i, label: 'Uploaded photo ' + (i + 1), kind: 'upload', src, bg: '#1A1A20', res: 'Your file', rec: true, tip: 'Uploaded by you', tipCls: 'lime' })));
   const isIn = (m) => (inc[m.id] !== undefined ? inc[m.id] : m.rec);
@@ -81,22 +101,13 @@ export default function BrandKit() {
   };
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip']} screen="Brand kit" guide>
+    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip']} screen="Brand kit">
       <Stepper current={1} />
       <PageHead
         eyebrow="Step 02 · Brand kit"
         title="One page every ad reads from."
         lede="Pulled from the link. Fix anything wrong once, lock it, and every script, shot and caption follows it."
         right={<button type="button" className={'btn' + (locked ? '' : ' primary')} onClick={() => setLocked(!locked)}><Icon.lock />{locked ? 'Unlock to edit' : 'Lock brand kit'}</button>}
-      />
-
-      <Guide
-        items={[
-          ["What it's for", 'Everything the ads must get right about this product: what it looks like, how the brand talks, and what we’re not allowed to say.'],
-          ['What you do', '1. Tick the product images to use and pick a hero. 2. Glance over the facts and voice; fix anything wrong. 3. Press Lock brand kit.'],
-          ['What happens next', 'Every script, shot and caption reads from this page. If you change it later, only new ads follow the change.']
-        ]}
-        terms={<><span><b>Hero image</b> = the main photo the video models copy, so the product looks right.</span><span><b>Guardrails</b> = words and claims that get blocked automatically.</span></>}
       />
 
       {locked && (
@@ -165,53 +176,76 @@ export default function BrandKit() {
         </div>
       </section>
 
+      <div className="row wrap between" style={{ gap: 12 }}>
+        <span className="muted" style={{ fontSize: 13 }}>{locked ? 'The kit is locked. Unlock it to make changes.' : 'Click any text to edit it. Add or remove tags, and click a colour to change it.'}</span>
+        {edited && !locked && <button type="button" className="mini anim-fade" onClick={() => setKit(KIT)}>Undo all changes</button>}
+      </div>
+
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(420px, 100%), 1fr))', gap: 16 }}>
         <section className="card stack" style={{ padding: 24, gap: 20 }}>
           <div className="row wrap" style={{ gap: 18 }}>
-            <div style={{ width: 88, height: 88, borderRadius: 16, background: '#1A1A20', border: '1px solid #26262D', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><div style={{ width: 30, height: 52, borderRadius: 6, background: RED }} /></div>
-            <div className="stack" style={{ gap: 6, minWidth: 0 }}>
-              <span className="pill green" style={{ alignSelf: 'flex-start' }}>Verified from page</span>
-              <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em' }}>Red Alert Gel Nail Strip</h2>
-              <span className="muted" style={{ fontSize: 14 }}>Gel nail strips · <span className="mono" style={{ color: 'var(--text)' }}>£12.99</span></span>
+            <div style={{ width: 88, height: 88, borderRadius: 16, background: '#1A1A20', border: '1px solid #26262D', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><div style={{ width: 30, height: 52, borderRadius: 6, background: kit.colors[0] || RED }} /></div>
+            <div className="stack" style={{ gap: 6, minWidth: 0, flex: 1 }}>
+              <span className={'pill ' + (edited ? 'amber' : 'green')} style={{ alignSelf: 'flex-start' }}>{edited ? 'Edited by you' : 'Verified from page'}</span>
+              <EditText label="product name" value={kit.name} onChange={put('name')} disabled={locked} style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em' }} />
+              <div className="row wrap muted" style={{ gap: 6, fontSize: 14 }}>
+                <span><EditText label="category" value={kit.category} onChange={put('category')} disabled={locked} style={{ width: 'auto', whiteSpace: 'nowrap' }} /></span>
+                <span>·</span>
+                <span className="mono" style={{ color: 'var(--text)' }}><EditText label="price" value={kit.price} onChange={put('price')} disabled={locked} placeholder="Add price" style={{ width: 'auto', whiteSpace: 'nowrap' }} /></span>
+              </div>
             </div>
           </div>
           <div className="sub stack" style={{ padding: '14px 16px', gap: 6 }}>
             <span className="lbl">The problem it solves</span>
-            <p style={{ fontSize: 15, lineHeight: 1.5 }}>A salon-style manicure without long application or damaging your nails at removal.</p>
+            <EditText label="the problem it solves" multiline value={kit.problem} onChange={put('problem')} disabled={locked} style={{ fontSize: 15, lineHeight: 1.5 }} />
           </div>
           <div className="stack" style={{ gap: 8 }}>
             <span className="lbl">Claims found on the page</span>
-            <div className="row wrap" style={{ gap: 8 }}>{['Salon-style finish at home', 'Applies in minutes', 'Peels off cleanly', 'Long-lasting wear'].map((t) => <span key={t} className="tag">{t}</span>)}</div>
+            <TagList items={kit.claims} onChange={put('claims')} disabled={locked} addLabel="Add claim" placeholder="e.g. Vegan formula" />
           </div>
-          <div className="row between" style={{ paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-            <span className="lbl">Current offer</span><span style={{ fontSize: 14, color: '#FDBA74' }}>[Add offer]</span>
+          <div className="row between" style={{ gap: 12, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+            <span className="lbl" style={{ flex: 'none' }}>Current offer</span>
+            <span style={{ fontSize: 14, color: kit.offer ? 'var(--text)' : '#FDBA74', minWidth: 0, flex: '0 1 260px', textAlign: 'right' }}><EditText label="current offer" value={kit.offer} onChange={put('offer')} disabled={locked} placeholder="[Add offer]" /></span>
           </div>
         </section>
 
         <section className="card stack" style={{ padding: 24, gap: 20 }}>
-          <h2 className="h2">Brand voice</h2>
-          <div className="row wrap" style={{ gap: 8 }}>
-            {['Playful', 'Confident', 'Salon-savvy', 'British'].map((t) => <span key={t} className="tag on">{t}</span>)}
-            {['Luxury', 'Clinical'].map((t) => <span key={t} className="tag">{t}</span>)}
+          <div className="stack" style={{ gap: 4 }}>
+            <h2 className="h2">Brand voice</h2>
+            <span className="faint" style={{ fontSize: 12 }}>Highlighted words are on. Click a word to turn it on or off.</span>
           </div>
+          <TagList items={kit.voice} onChange={(list) => setKit((prev) => ({ ...prev, voice: list, voiceOn: prev.voiceOn.filter((x) => list.includes(x)) }))} disabled={locked}
+            isOn={(t) => kit.voiceOn.includes(t)} onToggle={(t) => setKit((prev) => ({ ...prev, voiceOn: prev.voiceOn.includes(t) ? prev.voiceOn.filter((x) => x !== t) : [...prev.voiceOn, t] }))}
+            addLabel="Add word" placeholder="e.g. Cheeky" />
           <div className="sub stack" style={{ padding: 16, gap: 8 }}>
             <span className="lbl">Sounds like</span>
-            <p style={{ fontSize: 17, lineHeight: 1.45, letterSpacing: '-0.01em' }}>"Red that means business. Five minutes on the sofa, salon nails by dinner."</p>
+            <EditText label="sounds like" multiline value={kit.soundsLike} onChange={put('soundsLike')} disabled={locked} style={{ fontSize: 17, lineHeight: 1.45, letterSpacing: '-0.01em' }} />
           </div>
           <div className="stack" style={{ padding: 16, gap: 8, borderRadius: 12, border: '1px dashed #2E2E36' }}>
             <span className="lbl">Never sounds like</span>
-            <p className="muted" style={{ fontSize: 15, lineHeight: 1.5, textDecoration: 'line-through', textDecorationColor: 'var(--red)' }}>"Revolutionary nail technology for the modern woman."</p>
+            <EditText label="never sounds like" multiline value={kit.neverLike} onChange={put('neverLike')} disabled={locked} style={{ fontSize: 15, lineHeight: 1.5, color: 'var(--muted)', textDecoration: 'line-through', textDecorationColor: 'var(--red)' }} />
           </div>
         </section>
 
         <section className="card stack" style={{ padding: 24, gap: 20 }}>
           <h2 className="h2">Visual identity</h2>
-          <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            {['#C8102E', '#111111', '#F2D7D5', '#FFFFFF'].map((c) => (
-              <div key={c} className="stack" style={{ gap: 8 }}><div style={{ height: 72, borderRadius: 12, background: c, border: c === '#111111' ? '1px solid var(--line-3)' : 0 }} /><span className="mono faint" style={{ fontSize: 12 }}>{c}</span></div>
+          <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(76px, 1fr))', gap: 10 }}>
+            {kit.colors.map((c, i) => (
+              <div key={i} className="stack swatch anim-fade" style={{ gap: 8, position: 'relative' }}>
+                <label title={locked ? c : 'Click to change this colour'} style={{ display: 'block', position: 'relative', height: 72, borderRadius: 12, background: c, border: '1px solid var(--line-3)', cursor: locked ? 'default' : 'pointer', overflow: 'hidden' }}>
+                  <input type="color" value={HEX.test(c) ? c : '#000000'} disabled={locked} onChange={(e) => setColor(i, e.target.value)} aria-label={`Colour ${i + 1}`} style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'inherit' }} />
+                </label>
+                {!locked && kit.colors.length > 1 && <button type="button" className="swatch-x" aria-label={`Remove colour ${c}`} onClick={() => put('colors')(kit.colors.filter((_, j) => j !== i))}><Icon.x size={12} /></button>}
+                <input className="mono faint" value={c} disabled={locked} maxLength={7} aria-label={`Colour ${i + 1} hex`}
+                  onChange={(e) => { const v = ('#' + e.target.value.replace(/[^0-9a-fA-F]/g, '')).slice(0, 7); setColor(i, v); }}
+                  style={{ width: '100%', border: 0, background: 'transparent', fontSize: 12, padding: 0, color: HEX.test(c) ? undefined : '#FCA5A5', outline: 'none' }} />
+              </div>
             ))}
+            {!locked && kit.colors.length < 8 && (
+              <button type="button" className="stack" onClick={() => put('colors')([...kit.colors, '#888888'])} style={{ height: 72, borderRadius: 12, border: '1.5px dashed #3A3A42', background: 'transparent', color: 'var(--lime-hover)', alignItems: 'center', justifyContent: 'center', gap: 4, cursor: 'pointer', fontSize: 12 }}><Icon.plus />Add</button>
+            )}
           </div>
-          <span className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>Fonts and logo are pulled from the site too. Change a colour by clicking its swatch.</span>
+          <span className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>Fonts and logo are pulled from the site too. Click a swatch to pick a colour, or type a hex code under it.</span>
         </section>
 
         <section className="card stack" style={{ padding: 24, gap: 20 }}>
@@ -219,9 +253,8 @@ export default function BrandKit() {
             <h2 className="h2">Guardrails</h2>
             <p className="muted" style={{ fontSize: 14, lineHeight: 1.5 }}>Checked automatically on every script and caption before anything reaches review.</p>
           </div>
-          <div className="stack" style={{ gap: 8 }}><span className="lbl">Words to avoid</span><div className="row wrap" style={{ gap: 8 }}>{['press-on', 'cheap', 'fake nails'].map((t) => <span key={t} className="tag no">{t}</span>)}</div></div>
-          <div className="stack" style={{ gap: 8 }}><span className="lbl">Claims we can't make</span><div className="row wrap" style={{ gap: 8 }}>{['Exact wear time in days', '"Strengthens nails"'].map((t) => <span key={t} className="tag">{t}</span>)}</div></div>
-          <button type="button" className="btn" style={{ alignSelf: 'flex-start' }}><Icon.plus />Add a rule</button>
+          <div className="stack" style={{ gap: 8 }}><span className="lbl">Words to avoid</span><TagList items={kit.avoid} onChange={put('avoid')} tagClass="tag no" disabled={locked} addLabel="Add word" placeholder="e.g. budget" /></div>
+          <div className="stack" style={{ gap: 8 }}><span className="lbl">Claims we can't make</span><TagList items={kit.noClaims} onChange={put('noClaims')} disabled={locked} addLabel="Add claim" placeholder='e.g. "Lasts 3 weeks"' /></div>
         </section>
       </div>
 

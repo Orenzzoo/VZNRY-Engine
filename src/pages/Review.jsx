@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Stepper from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
+import Stepper, { EDITOR_STEPS } from '../components/Stepper.jsx';
 import { Icon } from '../components/Icons.jsx';
+import ClientFeedback from './ClientFeedback.jsx';
+import { ROUNDS } from '../data/reviews.js';
+import { useCurrentUser, person } from '../data/team.jsx';
+import { useWork, finishReview, reviewSubject } from '../data/work.js';
 
-const QUEUE = [
+const SAMPLE_QUEUE = [
   { title: 'Red before the event', caption: "Wedding's Saturday. Zero appointments.", recipe: 'AI UGC', character: 'Mia', angle: 'Occasion', qa: '94', length: '18 s', tint: '#3B2A22' },
   { title: 'My nails after gels', caption: 'Nobody warned me about the removal…', recipe: 'Wall of text', character: 'None', angle: 'Removal pain', qa: '96', length: '9 s', tint: '#24252C' },
   { title: 'Salon red, five minutes', caption: 'Salon red. Five minutes.', recipe: 'Product B-roll', character: 'Hands only', angle: 'Speed', qa: '88', length: '12 s', tint: '#4A0F18' },
@@ -15,7 +18,25 @@ const QUEUE = [
 ];
 const REASONS = ['Wrong product', 'Uncanny face or hands', 'Weak hook', 'Off-brand', 'Caption problem', 'Other'];
 
+// Two views: the researcher's keep/skip check of an editor's submitted ads (?submission=rv1), and
+// "Client feedback" (?round=r2) to go through what a client said, video by video.
 export default function Review() {
+  const [params, setParams] = useSearchParams();
+  const user = useCurrentUser();
+  const { reviews, tasks } = useWork();
+  const roundId = params.get('round');
+  const tab = roundId ? 'client' : 'ours';
+  const round = ROUNDS.find((r) => r.id === roundId);
+  // Which submission is being reviewed: the one in the URL, else the oldest one still waiting.
+  const waiting = reviews.filter((r) => r.status === 'waiting');
+  const [initialId] = useState(() => (user.role === 'researcher' && waiting.length ? waiting[waiting.length - 1].id : null));
+  const subm = reviews.find((r) => r.id === (params.get('submission') || initialId)) || null;
+  const subject = subm && reviewSubject(subm, tasks);
+  const fromEditor = subm && person(subm.editor);
+  const QUEUE = subm
+    ? subm.ads.map((a, n) => ({ title: `Ad ${n + 1} · ${a.label}`, caption: a.text, recipe: a.format, character: '-', angle: subject.client, qa: String(86 + ((n * 5) % 12)), length: `${a.secs} s`, tint: a.bg }))
+    : SAMPLE_QUEUE;
+  const alreadyDone = subm && subm.status === 'done';
   const [i, setI] = useState(0);
   const [kept, setKept] = useState(0);
   const [skipped, setSkipped] = useState(0);
@@ -25,20 +46,28 @@ export default function Review() {
   const cur = QUEUE[Math.min(i, QUEUE.length - 1)];
 
   // In the real build, save each decision (and skip reason) against the clip so the learning loop can use it.
-  const keep = () => { setKept(kept + 1); setI(i + 1); setRejecting(false); };
-  const skip = (reason) => { setSkipped(skipped + 1); setLog({ ...log, [reason]: (log[reason] || 0) + 1 }); setI(i + 1); setRejecting(false); };
+  // The last decision finishes the review and sends the result back to the editor.
+  const advance = (k, s, lg) => { if (i + 1 >= QUEUE.length && subm && !alreadyDone) finishReview(subm.id, { kept: k, skipped: s, reasons: lg }); setI(i + 1); setRejecting(false); };
+  const keep = () => { setKept(kept + 1); advance(kept + 1, skipped, log); };
+  const skip = (reason) => { const lg = { ...log, [reason]: (log[reason] || 0) + 1 }; setSkipped(skipped + 1); setLog(lg); advance(kept, skipped + 1, lg); };
   const reset = () => { setI(0); setKept(0); setSkipped(0); setLog({}); setRejecting(false); };
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} screen="Review" guide>
-      <Stepper current={5} />
-      <PageHead eyebrow="Step 06 · Review" title="Keep or skip. Say why." lede="Only pieces that passed the quality checks get here. Every skip reason teaches the next batch." />
+    <Layout section={tab === 'client' ? 'Client reviews' : user.role === 'researcher' ? 'Editors' : 'My tasks'} crumbs={tab === 'client' && round ? [round.client, round.product, round.round] : subject ? ['Editors', 'Review', subject.title] : ['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} brand={tab === 'client' && round ? { name: round.client, color: round.dot } : undefined} screen={tab === 'client' ? 'Client feedback' : 'Review'}>
+      {user.role === 'editor' && <Stepper steps={EDITOR_STEPS} current={2} />}
+      <PageHead
+        eyebrow={tab === 'client' ? 'Step 03 · Review · Client feedback' : 'Step 03 · Review'}
+        title={tab === 'client' ? 'What the client said.' : subm ? `Review ${fromEditor.name}'s ads.` : 'Keep or skip. Say why.'}
+        lede={tab === 'client' ? 'Every video you sent in this round, one by one, with the client\'s decision and their comments at the exact moment they made them.' : subm ? `${subject.title} · ${subm.ads.length} stitched ads sent ${subm.sent}. Keep or skip each one; kept ads go back to ${fromEditor.name} to send to the client.` : 'Only pieces that passed the quality checks get here. Every skip reason teaches the next batch.'}
+        right={
+          <div className="segs" role="tablist" aria-label="Review view" style={{ minWidth: 'min(340px, 100%)' }}>
+            <button type="button" role="tab" aria-selected={tab === 'ours'} className={'seg' + (tab === 'ours' ? ' on' : '')} onClick={() => setParams({}, { replace: true })}>Our check</button>
+            <button type="button" role="tab" aria-selected={tab === 'client'} className={'seg' + (tab === 'client' ? ' on' : '')} onClick={() => setParams({ round: roundId || 'r2' }, { replace: true })}>Client feedback</button>
+          </div>
+        }
+      />
 
-      <Guide items={[
-        ["What it's for", "Our team's own check, before anything goes to a client or gets posted."],
-        ['What you do', 'Watch each video, then press Keep or Skip. When you skip, pick the reason. It takes one click.'],
-        ['What happens next', 'Kept videos are resized and captioned, then wait in Deliver. Skip reasons make the next batch better.']
-      ]} />
+      {tab === 'client' ? <ClientFeedback key={roundId} roundId={roundId} onRound={(id) => setParams({ round: id }, { replace: true })} /> : (
 
       <div className="row wrap" style={{ gap: 24, alignItems: 'flex-start' }}>
         <section style={{ flex: '999 1 520px', minWidth: 0 }}>
@@ -88,11 +117,11 @@ export default function Review() {
           {done && (
             <div className="card stack" style={{ padding: 32, gap: 16, alignItems: 'flex-start', maxWidth: 620 }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--lime)', color: '#0B0B0F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon.check size={22} sw={2.8} /></div>
-              <h2 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em' }}>Queue cleared</h2>
-              <p className="muted" style={{ fontSize: 15, lineHeight: 1.55 }}>{kept} kept, {skipped} skipped. Kept pieces are resized and captioned in every size you picked.</p>
+              <h2 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em' }}>{subm ? 'Review sent back' : 'Queue cleared'}</h2>
+              <p className="muted" style={{ fontSize: 15, lineHeight: 1.55 }}>{kept} kept, {skipped} skipped. {subm ? (kept ? `${fromEditor.name} can now send the kept ads to ${subject.client || 'the client'}.` : `Nothing kept, so it's back with ${fromEditor.name} to remake.`) : 'Kept pieces are resized and captioned in every size you picked.'}</p>
               <div className="row wrap" style={{ gap: 10 }}>
-                <Link className="btn primary" to="/product/deliver">Go to delivery</Link>
-                <button type="button" className="btn" onClick={reset}>Start over</button>
+                {subm ? <Link className="btn primary" to="/editors">Back to Editors</Link> : <Link className="btn primary" to="/product/deliver">Go to delivery</Link>}
+                {waiting.filter((r) => r.id !== subm?.id).length > 0 && <Link className="btn" to={`/product/review?submission=${waiting.filter((r) => r.id !== subm.id)[0].id}`} onClick={reset}>Next review</Link>}
               </div>
             </div>
           )}
@@ -111,6 +140,7 @@ export default function Review() {
           </div>
         </aside>
       </div>
+      )}
     </Layout>
   );
 }

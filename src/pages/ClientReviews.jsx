@@ -1,16 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
+import { Icon } from '../components/Icons.jsx';
+import { ROUNDS as RAW, roundCounts, latestComment } from '../data/reviews.js';
 
-const ROUNDS = [
-  { id: 'r1', client: 'Moyou London', dot: '#C8102E', product: 'Red Alert', round: 'Round 2', videos: 6, dates: 'sent Mon 5 Oct · due Thu 8 Oct', ok: 0, no: 0, wait: 6, kind: 'waiting', status: 'Waiting on client', statusCls: '', activity: 'Link opened 2 h ago', comment: '' },
-  { id: 'r3', client: 'Dollar Tree', dot: '#2E7D32', product: 'Secrets EP 01–03', round: 'Round 1', videos: 3, dates: 'sent Fri 2 Oct · was due Mon 5 Oct', ok: 0, no: 0, wait: 3, kind: 'overdue', status: 'Overdue', statusCls: 'red', activity: 'Not opened yet', comment: '' },
-  { id: 'r2', client: 'Moyou London', dot: '#C8102E', product: 'Red Alert', round: 'Round 1', videos: 6, dates: 'sent Sat 3 Oct', ok: 2, no: 2, wait: 2, kind: 'fix', status: 'Needs our fixes', statusCls: 'amber', activity: 'Fixes sent as round 2', comment: 'Red looks a bit orange here.' },
-  { id: 'r5', client: 'Pillow client', dot: '#7C9CF5', product: 'Story 01', round: 'Round 1', videos: 1, dates: 'sent Sun 4 Oct', ok: 0, no: 1, wait: 0, kind: 'fix', status: 'Needs our fixes', statusCls: 'amber', activity: 'Reviewed yesterday', comment: 'Can the pillow look a bit fluffier when it wakes up?' },
-  { id: 'r6', client: 'Moyou London', dot: '#C8102E', product: 'Too Hot To Handle', round: 'Round 1', videos: 5, dates: 'sent Thu 1 Oct', ok: 4, no: 1, wait: 0, kind: 'fix', status: 'Needs our fixes', statusCls: 'amber', activity: 'Reviewed Fri', comment: 'Love these. Just swap the music on the last one.' },
-  { id: 'r4', client: 'HookLife', dot: '#60A5FA', product: 'Hook test', round: 'Round 3', videos: 8, dates: 'sent Tue 29 Sep', ok: 8, no: 0, wait: 0, kind: 'done', status: 'All approved', statusCls: 'green', activity: 'Downloaded Wed', comment: '' }
-];
+const ROUNDS = RAW.map((r) => ({ ...r, ...roundCounts(r), comment: latestComment(r) }));
+
 const COMMENTS = [
   ['Moyou London', '#F2A3AE', 'Salon red, five minutes', '3 Oct', 'Red looks a bit orange here.', 'Changes', 'red', '0:07'],
   ['Pillow client', '#B9C7F7', 'The 3 AM rescue', '4 Oct', 'Can the pillow look a bit fluffier when it wakes up?', 'Changes', 'red', '0:05'],
@@ -27,17 +22,8 @@ export default function ClientReviews() {
   const shown = ROUNDS.filter((r) => filter === 'all' || (filter === 'waiting' ? isWaiting(r) : r.kind === filter));
 
   return (
-    <Layout section="Client reviews" crumbs={['Visionary Studios', 'Client reviews']} brand={{ name: 'All brands', color: 'var(--lime)' }} guide>
+    <Layout section="Client reviews" crumbs={['Visionary Studios', 'Client reviews']} brand={{ name: 'All brands', color: 'var(--lime)' }}>
       <PageHead eyebrow="Workspace · Client reviews" title="Where every client review stands." lede="All review links we've sent, what each client decided, and what's waiting on us or on them." />
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", 'A summary of every review link sent to clients, so you know who to chase and what to fix.'],
-          ['What you do', 'Start with "Needs our fixes": open those in the Director. For "Waiting on client", press Nudge to send a reminder.'],
-          ['What happens next', 'Fixed videos go out as the next round. Approved videos unlock for the client to download.']
-        ]}
-        terms={<><span><b>Bar colours:</b> green approved, red changes requested, grey not reviewed yet.</span><span><b>Round</b> = one review cycle for a batch.</span></>}
-      />
 
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
         {[['Waiting on clients', count('waiting'), '1 overdue'], ['Needs our fixes', count('fix'), 'rounds with change requests', '#FCA5A5'], ['First-round approval ⓘ', '68%', '+9 pts this month', null, '#86EFAC'], ['Avg. client response', '1.6 days', 'from link sent to decision']].map(([l, v, s, c, sc]) => (
@@ -61,11 +47,14 @@ export default function ClientReviews() {
           {shown.map((r) => (
             <div key={r.id} className="stack anim-in" style={{ gap: 12, padding: '16px 18px', borderTop: '1px solid var(--line)' }}>
               <div className="row wrap between" style={{ alignItems: 'flex-start', gap: 10 }}>
-                <div className="row" style={{ gap: 12, minWidth: 0 }}>
+                <Link to={`/product/review?round=${r.id}`} className="row round-link" style={{ gap: 12, minWidth: 0, textDecoration: 'none', color: 'var(--text)' }}>
                   <span style={{ flex: 'none', width: 10, height: 10, borderRadius: 3, background: r.dot }} />
                   <div className="stack" style={{ gap: 3, minWidth: 0 }}><span style={{ fontWeight: 600 }}>{r.client} · {r.product}</span><span className="faint" style={{ fontSize: 12 }}>{r.round} · {r.videos} videos · {r.dates}</span></div>
-                </div>
-                <span className={'pill ' + r.statusCls}>{r.status}</span>
+                </Link>
+                <span className="row" style={{ gap: 8 }}>
+                  <span className={'pill ' + r.statusCls}>{r.status}</span>
+                  <Link to={`/product/review?round=${r.id}`} className="icon-btn" aria-label={`Open ${r.client} ${r.round}`} title="See videos and comments"><Icon.arrow /></Link>
+                </span>
               </div>
               <div className="stack" style={{ gap: 6 }}>
                 <div className="row" style={{ height: 8, borderRadius: 8, overflow: 'hidden', gap: 2, background: 'var(--line)' }}>
@@ -82,9 +71,9 @@ export default function ClientReviews() {
               </div>
               {r.comment && <div className="sub" style={{ padding: '10px 12px', fontSize: 13, lineHeight: 1.45 }}><span className="faint">Latest comment · </span>"{r.comment}"</div>}
               <div className="row wrap" style={{ gap: 8 }}>
-                {r.kind === 'fix' && <Link className="btn primary sm" to="/product/director">Fix in Director</Link>}
+                {r.kind === 'fix' && <Link className="btn primary sm" to={`/generate?task=${r.task}`}>Fix in Generate</Link>}
                 {isWaiting(r) && <button type="button" className="btn sm" onClick={() => setNudged({ ...nudged, [r.id]: true })}>{nudged[r.id] ? 'Reminder sent' : 'Nudge client'}</button>}
-                <Link className="btn sm" to="/product/deliver">Open round</Link>
+                <Link className="btn sm" to={`/product/review?round=${r.id}`}>See videos and comments</Link>
                 <Link className="btn sm" to={`/review/${r.id}`}>Client's view</Link>
               </div>
             </div>

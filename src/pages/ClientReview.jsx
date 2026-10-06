@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 // The page a client opens from a review link. No sidebar, no login.
@@ -68,15 +67,6 @@ export default function ClientReview() {
       {submitted && <div className="notice" style={{ margin: '20px 32px 0' }}>Thanks! Your review was sent to Visionary Studios: {approved} approved, {rejected} with changes requested, {commentTotal} comments. Approved videos are now available to download.</div>}
 
       <div style={{ padding: '20px 32px 0', maxWidth: 1440, width: '100%' }}>
-        <Guide
-          title="How to review (takes about 5 minutes)"
-          items={[
-            ['1 · Pick a video', 'Choose one from the list on the left.'],
-            ['2 · Comment on a moment', 'Drag the bar under the video to the moment you mean, type your note and press Post.'],
-            ['3 · Decide', 'Press Approve, or Request changes and say what to change.'],
-            ['4 · Send', "When you're done, press Send review at the top. You can review some now and the rest later."]
-          ]}
-        />
       </div>
 
       <main className="row wrap" style={{ flex: 1, gap: 24, padding: '24px 32px 48px', alignItems: 'flex-start', maxWidth: 1440, width: '100%' }}>

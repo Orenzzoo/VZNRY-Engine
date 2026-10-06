@@ -7,7 +7,8 @@ All screens and interactions on sample data. React + Vite + React Router.
 
 ## Phase 1: Core engine (MVP)
 Goal: one click produces output good enough to keep.
-- Backend, database, team login (**Open question:** stack, e.g. Supabase / Node API / Python workers)
+- Backend, database, team login with roles (researcher, editor) and per-role permissions (**Open question:** stack, e.g. Supabase / Node API / Python workers)
+- Research packages, hand-off and tasks (assign, status, notifications to the editor)
 - Product link → brand kit (scrape, voice, visuals, cutouts, image triage)
 - Buyer research → voice-of-customer bank + personas
 - 2 recipes first: **AI UGC talking head** and **wall of text**
@@ -19,6 +20,8 @@ Goal: one click produces output good enough to keep.
 ## Phase 2: Agency workflow
 - Client review links (private, expiring) with approve / changes / timestamped comments
 - Client reviews summary, Review queue with assignment
+- Client "Request changes" automatically reopens the editor's task
+- Researcher dashboards: pipeline, workload, time from research to client approval
 - Library of every clip
 - Characters with consent, voices and consistency tests
 - More recipes; custom prompt editor
@@ -33,6 +36,7 @@ Goal: one click produces output good enough to keep.
 - Language versions, batch mode across products
 
 ## Open questions
+- Do we need an admin / lead role (approves hand-offs, sees budgets), or does the researcher cover that?
 - Which video, avatar, voice and vision models per shot type (test before committing).
 - Animation: fully AI-generated vs animating fixed artwork in code.
 - Hosting and storage for large video files.

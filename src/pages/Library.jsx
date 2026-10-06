@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const S = { review: ['In review', 'amber'], client: ['With client', 'blue'], approved: ['Approved', 'green'], delivered: ['Delivered', 'lime'], posted: ['Posted', 'lime'], skipped: ['Skipped', ''] };
@@ -37,17 +36,8 @@ export default function Library() {
   const pickCount = Object.values(picks).filter(Boolean).length;
 
   return (
-    <Layout section="Library" crumbs={['Visionary Studios', 'Library']} brand={{ name: 'All brands', color: 'var(--lime)' }} guide>
+    <Layout section="Library" crumbs={['Visionary Studios', 'Library']} brand={{ name: 'All brands', color: 'var(--lime)' }}>
       <PageHead eyebrow="Workspace · Library" title="Every clip we've made." lede="All finished videos across every brand, with where each one is: in review, approved, delivered or posted." />
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", "Finding any video we've made: to re-send it, download it, or reuse a winner."],
-          ['What you do', 'Filter by status, brand or format, or search by title. Click a clip to see its details. Tick the box in the corner to select several for bulk actions.'],
-          ['What happens next', 'Selected clips can be downloaded, sent for client review, or turned into new variations.']
-        ]}
-        terms={<span><b>Statuses:</b> In review (ours) → With client → Approved → Delivered or Posted. <b>Skipped</b> clips are kept for 30 days in case you want them back.</span>}
-      />
 
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
         {[['597', 'clips in total'], ['412', 'approved'], ['128', 'delivered this month'], ['6', 'brands']].map(([v, l]) => (
@@ -76,7 +66,7 @@ export default function Library() {
           <span style={{ flex: '1 1 140px', fontSize: 14, fontWeight: 600, color: '#BFDBFE' }}>{pickCount} selected</span>
           <button type="button" className="btn sm">Download</button>
           <Link className="btn sm" to="/product/deliver">Send for client review</Link>
-          <Link className="btn sm" to="/product/formats">Make variations</Link>
+          <Link className="btn sm" to="/generate">Make variations</Link>
           <button type="button" className="btn sm" onClick={() => setPicks({})}>Clear</button>
         </div>
       )}
@@ -134,7 +124,7 @@ export default function Library() {
           <div className="grid-auto" style={{ gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <button type="button" className="btn sm">Download</button>
             <Link className="btn sm" to="/product/deliver">Send to client</Link>
-            <Link className="btn sm" to="/product/formats">Make variations</Link>
+            <Link className="btn sm" to="/generate">Make variations</Link>
             <Link className="btn sm" to="/product/publish">Publish</Link>
           </div>
         </aside>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const SLOT = { hook: ['#C6F432', '#0B0B0F'], body: ['#2A2A31', '#F4F4F5'], cta: ['#60A5FA', '#0B0B0F'] };
@@ -52,21 +51,12 @@ export default function Recipes() {
   const sel = RECIPES.find((r) => r.id === id);
 
   return (
-    <Layout section="Recipes" crumbs={['Visionary Studios', 'Recipes']} guide>
+    <Layout section="Recipes" crumbs={['Visionary Studios', 'Recipes']}>
       <PageHead
         eyebrow="Workspace · Recipes"
         title="Formats the team has tuned."
         lede="A recipe is written and tested once by someone good at prompting, then anyone can use it with one click. Shared across every brand."
         right={<Link className="btn primary" to="/recipes/editor"><Icon.plus />New recipe from my prompt</Link>}
-      />
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", 'The team’s library of tested video formats, shared across every brand.'],
-          ['What you do', 'Click a recipe to see how it’s built. Press "Use in a batch" to make videos with it, or create your own from "New recipe from my prompt".'],
-          ['What happens next', 'Live recipes appear on the Formats step for every product. Drafts stay here until they’re tested.']
-        ]}
-        terms={<><span><b>QA pass</b> = share of shots that pass the quality check.</span><span><b>Hold rate</b> = share of viewers still watching after 3 seconds.</span><span><b>Testing / Draft</b> = not proven yet; use with care.</span></>}
       />
 
       <div className="row wrap" role="group" aria-label="Filter recipes" style={{ gap: 8 }}>
@@ -119,7 +109,7 @@ export default function Recipes() {
           </div>
           <div className="row wrap" style={{ gap: 8 }}>
             <Link className="btn" to="/recipes/editor" style={{ flex: 1 }}>Edit prompt</Link>
-            <Link className="btn primary" to="/product/formats" style={{ flex: 1 }}>Use in a batch</Link>
+            <Link className="btn primary" to="/generate" style={{ flex: 1 }}>Use in Generate</Link>
           </div>
         </aside>
       </div>

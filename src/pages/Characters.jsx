@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const BASE = [
@@ -102,7 +101,7 @@ export default function Characters() {
   };
 
   return (
-    <Layout section="Characters" crumbs={['Visionary Studios', 'Characters']} brand={{ name: 'All brands', color: 'var(--lime)' }} guide>
+    <Layout section="Characters" crumbs={['Visionary Studios', 'Characters']} brand={{ name: 'All brands', color: 'var(--lime)' }}>
       <PageHead
         eyebrow="Workspace · Characters"
         title="Your cast, ready for any ad."
@@ -113,16 +112,6 @@ export default function Characters() {
             <button type="button" className="btn primary" onClick={() => setMode('generate')}><Icon.wand />Generate character</button>
           </div>
         }
-      />
-
-      <Guide
-        title="How this page works"
-        items={[
-          ["What it's for", 'Everyone and everything that can appear in our ads, across all brands.'],
-          ['What you do', 'Click a character to check its photos, voice and rights. To make a new one, press "Generate character" and describe who you want, or "Upload a real person" with 4 photos and signed consent.'],
-          ['What happens next', 'Generated characters are ready in about 20 seconds; uploaded people train for about 10 minutes. Both then appear in Look and cast and on the Formats step.']
-        ]}
-        terms={<><span><b>Match %</b> = how often test shots look like the reference photos. Above 90% is reliable.</span><span><b>AI-generated</b> = not a real person. <b>Uploaded</b> = a real person, consent required.</span></>}
       />
 
       <div className="row wrap" role="group" aria-label="Filter characters" style={{ gap: 8 }}>
@@ -287,7 +276,7 @@ export default function Characters() {
               <div className="stack" style={{ gap: 6 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Used in</span><span className="muted" style={{ fontSize: 14 }}>{sel.usedIn}</span></div>
               <div className="row wrap" style={{ gap: 8 }}>
                 <button type="button" className="btn" style={{ flex: 1 }}>Run 4 test shots</button>
-                <Link className="btn primary" to="/product/formats" style={{ flex: 1 }}>Use in a batch</Link>
+                <Link className="btn primary" to="/generate" style={{ flex: 1 }}>Use in Generate</Link>
               </div>
             </>
           )}

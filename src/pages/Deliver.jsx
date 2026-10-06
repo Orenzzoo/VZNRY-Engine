@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
-import Stepper from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
+import Stepper, { EDITOR_STEPS } from '../components/Stepper.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const ROUTES = [
-  { id: 'review', title: 'Client review link', tag: 'Recommended', tagCls: 'lime', about: 'The client approves, rejects and comments on each video. Approved files unlock for download.' },
-  { id: 'download', title: 'Download files', tag: 'Hand-off', tagCls: '', about: 'Every size, captions as .srt, thumbnails and an ad copy sheet in one zip.' },
-  { id: 'publish', title: 'Publish to our channels', tag: 'Optional', tagCls: '', about: 'Only when we run the accounts. Schedule posts and promote winners.' }
+  { id: 'review', icon: 'link', title: 'Client review link', tag: 'Recommended', tagCls: 'lime', about: 'The client approves, rejects and comments on each video. Approved files unlock for download.' },
+  { id: 'download', icon: 'download', title: 'Download files', tag: 'Hand-off', tagCls: '', about: 'Every size, captions as .srt, thumbnails and an ad copy sheet in one zip.' },
+  { id: 'publish', icon: 'publish', title: 'Publish to our channels', tag: 'Optional', tagCls: '', about: 'Only when we run the accounts. Schedule posts and promote winners.' }
 ];
 const VIDS = [
   { id: 'v1', title: 'Red before the event', recipe: 'AI UGC', len: '18 s', bg: '#3B2A22' },
@@ -38,27 +37,23 @@ export default function Deliver() {
   const pickCount = VIDS.filter((v) => picks[v.id]).length;
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} screen="Deliver" guide>
-      <Stepper current={6} />
+    <Layout section="My tasks" crumbs={['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} screen="Deliver">
+      <Stepper steps={EDITOR_STEPS} current={3} />
       <section className="stack" style={{ gap: 12 }}>
-        <span className="eyebrow">Step 07 · Deliver</span>
         <h1 className="h1">Get it to the client.</h1>
         <p className="lede">Send a review link so the client can approve, reject and comment on each video, hand over the files, or post to our own channels. Pick whichever fits this job.</p>
       </section>
 
-      <Guide
-        items={[
-          ["What it's for", 'Getting the finished videos to whoever needs them.'],
-          ['What you do', 'Most client jobs: pick "Client review link", tick the videos, add the reviewer and press Send. Use "Download files" for a plain hand-off. Publishing is only for accounts we run.'],
-          ['What happens next', 'The client\'s approvals and comments appear in the feedback table below. "Fix in Director" sends change requests back to be remade.']
-        ]}
-        terms={<><span><b>Round</b> = one review cycle. Fixes go out as round 2, and so on.</span><span>Use "Preview what the client sees" to check the client's view before sending.</span></>}
-      />
-
       <div className="grid-auto" role="group" aria-label="Delivery route" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
         {ROUTES.map((r) => (
           <button key={r.id} type="button" className={'pick' + (r.id === route ? ' on' : '')} style={{ padding: 18, gap: 10 }} aria-pressed={r.id === route} onClick={() => setRoute(r.id)}>
-            <span className="row between" style={{ gap: 8 }}><span style={{ fontSize: 16, fontWeight: 600 }}>{r.title}</span><span className={'pill ' + r.tagCls}>{r.tag}</span></span>
+            <span className="row between" style={{ gap: 8 }}>
+              <span className="row" style={{ gap: 12 }}>
+                <span className="route-icon">{(() => { const I = Icon[r.icon]; return <I size={18} />; })()}</span>
+                <span style={{ fontSize: 16, fontWeight: 600 }}>{r.title}</span>
+              </span>
+              <span className={'pill ' + r.tagCls}>{r.tag}</span>
+            </span>
             <span className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>{r.about}</span>
           </button>
         ))}
@@ -155,7 +150,7 @@ export default function Deliver() {
                 <span><span className={'pill ' + r.cls}>{r.status}</span></span>
                 <span className="mono muted">{r.comments}</span>
                 <span className="row" style={{ justifyContent: 'flex-end' }}>
-                  {r.fix ? <Link className="btn sm" to="/product/director">Fix in Director</Link> : <Link className="btn sm" to="/review/moyou-batch-4-round-1">Open review</Link>}
+                  {r.fix ? <Link className="btn sm" to="/generate?task=t3">Fix in Generate</Link> : <Link className="btn sm" to="/review/moyou-batch-4-round-1">Open review</Link>}
                 </span>
               </div>
             ))}

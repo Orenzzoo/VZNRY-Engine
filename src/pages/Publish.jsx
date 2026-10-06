@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
-import Stepper from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
+import Stepper, { EDITOR_STEPS } from '../components/Stepper.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const STATUS = { live: 'green', promo: 'lime', ready: '', sched: 'blue' };
@@ -27,23 +26,13 @@ export default function Publish() {
   const shown = ADS.filter((a) => filter === 'all' || a.type === filter);
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip']} screen="Publish" guide>
-      <Stepper current={6} />
+    <Layout section="My tasks" crumbs={['Moyou London', 'Red Alert Gel Nail Strip']} screen="Publish">
+      <Stepper steps={EDITOR_STEPS} current={3} />
       <section className="stack" style={{ gap: 12 }}>
-        <span className="row wrap" style={{ gap: 10 }}><span className="eyebrow">Step 07 · Deliver</span><span className="pill">Optional · only when we run the accounts</span></span>
+        <span className="row wrap" style={{ gap: 10 }}><span className="pill">Optional · only when we run the accounts</span></span>
         <h1 className="h1">Post it, watch it, scale winners.</h1>
         <p className="lede">Schedule kept pieces organically, promote what takes off, and let results steer the next batch.</p>
       </section>
-
-      <Guide
-        title="How this screen works"
-        items={[
-          ["What it's for", 'Optional. Only for brands where we post on their social accounts. Client jobs that they post themselves skip this.'],
-          ['What you do', 'Click videos to select them, choose the channels, then press Schedule.'],
-          ['What happens next', 'Results come back here. The best performers can be turned into new variations or promoted as paid ads.']
-        ]}
-        terms={<><span><b>Hold rate</b> = share of viewers still watching after 3 seconds.</span><span><b>ROAS</b> = revenue for every $1 of ad spend.</span></>}
-      />
 
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         {[['Views, last 7 days', '1.28M', '+34% vs prior week', true], ['Avg. hold rate', '38%', '+6 pts', true], ['Promoted to ads', '4', 'of 42 posted'], ['Paid ROAS', '2.6×', 'blended, promoted only']].map(([l, v, s, up]) => (
@@ -96,7 +85,7 @@ export default function Publish() {
               {[['412K', 'views'], ['61%', 'hold rate'], ['2.9×', 'ROAS paid']].map(([v, l]) => <div key={l} className="stack" style={{ gap: 2 }}><span className="mono" style={{ fontSize: 20 }}>{v}</span><span className="faint" style={{ fontSize: 11 }}>{l}</span></div>)}
             </div>
             <div className="row wrap" style={{ gap: 8 }}>
-              <Link className="btn primary" to="/product/formats" style={{ flex: 1 }}>Make 10 variations</Link>
+              <Link className="btn primary" to="/generate" style={{ flex: 1 }}>Make 10 variations</Link>
               <button type="button" className="btn" style={{ flex: 1 }}>Promote on Meta</button>
             </div>
           </div>

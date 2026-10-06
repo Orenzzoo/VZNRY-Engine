@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
 import Stepper, { BRIEF_STEPS } from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
 import { Icon } from '../components/Icons.jsx';
-import { EXAMPLES, BriefSource, useExample } from './briefExamples.jsx';
+import { EXAMPLES, BriefSource, useExample, useEpisodes } from './briefExamples.jsx';
 
 const PRESENTERS = [
   { id: 'tasha', name: 'Tasha, 34', vibe: 'Warm, chatty, feels like a friend letting you in on something', tag: 'Most used', scene: '#2B3A2E', skin: '#9C6B4E', shirt: '#3F6B4A' },
@@ -36,7 +35,7 @@ export default function Cast() {
   const [exId] = useExample();
   const ex = EXAMPLES[exId];
   const isDT = ex.style !== 'anim'; // presenter-style briefs cast a person; animated ones lock a look
-  const picked = Object.values(ex.defaultPicks).filter(Boolean).length;
+  const picked = useEpisodes(exId).selected.length;
   const firstLine = ex.beats[0][1].replace(/^"|"$/g, '');
   const [pid, setPid] = useState('tasha');
   const [voice, setVoice] = useState('warm');
@@ -46,22 +45,13 @@ export default function Cast() {
   const sel = STYLES.find((s) => s.id === sid);
 
   return (
-    <Layout section="Briefs" crumbs={['Briefs', ex.name]} screen="Look and cast" brand={{ name: ex.client, color: ex.dot }} guide>
-      <Stepper steps={BRIEF_STEPS.map((s) => ({ ...s, to: s.to.startsWith('/briefs') ? `${s.to}?ex=${exId}` : s.to }))} current={2} />
+    <Layout section="Custom videos" crumbs={['Custom videos', ex.name]} screen="Look and cast" brand={{ name: ex.client, color: ex.dot }}>
+      <Stepper steps={BRIEF_STEPS.map((s) => ({ ...s, to: `${s.to}?ex=${exId}` }))} current={2} />
       <PageHead
         eyebrow="Briefs · Step 03"
         title={isDT ? 'Cast the face of the series.' : 'Lock the look before any video.'}
         lede={isDT ? 'Pick one presenter and voice. They stay the same across every episode, so viewers start to recognise them.' : 'Animation drifts when the style isn’t fixed. Approve a style frame and a character sheet first; every shot is built from them.'}
         right={<BriefSource exId={exId} />}
-      />
-
-      <Guide
-        items={[
-          ["What it's for", 'Locking who or what appears, so every video in the series looks like the same world.'],
-          ['What you do', 'Presenter series: pick one presenter and a voice. Animation: pick a style, then approve the character sheet.'],
-          ['What happens next', 'Your choice is used as the reference image in every shot, then the scripts go to the Director.']
-        ]}
-        terms={<><span><b>Style frame</b> = one still picture showing the look before any video is made.</span><span><b>Character sheet</b> = the character drawn in several poses, so it never changes shape between shots.</span></>}
       />
 
       {isDT ? (
@@ -134,8 +124,8 @@ export default function Cast() {
       )}
 
       <div className="row wrap between" style={{ gap: 12 }}>
-        <Link className="btn" to={`/briefs/concepts?ex=${exId}`}>Back to concepts</Link>
-        <Link className="btn primary" to="/product/director">Send {picked || 'your'} {ex.conceptsTitle.toLowerCase()} to Director <Icon.arrow /></Link>
+        <Link className="btn" to={`/custom/episodes?ex=${exId}`}>Back to episodes</Link>
+        <Link className="btn primary" to={`/custom/generate?ex=${exId}`}>Generate {picked || 'your'} {ex.conceptsTitle.toLowerCase()} <Icon.arrow /></Link>
       </div>
     </Layout>
   );

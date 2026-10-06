@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout, { PageHead } from '../components/Layout.jsx';
-import Stepper from '../components/Stepper.jsx';
-import Guide from '../components/Guide.jsx';
+import Stepper, { EDITOR_STEPS } from '../components/Stepper.jsx';
 import { Icon } from '../components/Icons.jsx';
 
 const PIECES = [
@@ -58,10 +57,10 @@ export default function Director() {
   const sel = PIECES[idx];
 
   return (
-    <Layout section="Products" crumbs={['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} screen="Director" guide>
-      <Stepper current={4} />
+    <Layout section="Generate" crumbs={['Moyou London', 'Red Alert Gel Nail Strip', 'Batch 4']} screen="Director">
+      <Stepper steps={EDITOR_STEPS} current={1} />
       <PageHead
-        eyebrow="Step 05 · Director"
+        eyebrow="Step 02 · Generate · Shot list"
         title="Script, shots, then footage."
         lede="Every piece becomes a shot list before anything is generated, and every shot is quality-checked. Watch, or step in with plain words."
         right={
@@ -71,15 +70,6 @@ export default function Director() {
             <span className="faint" style={{ fontSize: 12 }}>About 6 min left · $41 spent</span>
           </div>
         }
-      />
-
-      <Guide
-        items={[
-          ["What it's for", 'Watching each video get planned and made: first the script, then a list of shots, then the footage for each shot.'],
-          ['What you do', 'Nothing is required. Click a video on the left to look inside it. To change something, type it in plain words under "Ask for a change".'],
-          ['What happens next', 'Videos that pass every quality check move to Review automatically.']
-        ]}
-        terms={<><span><b>Shot list</b> = the video broken into short clips, each made separately.</span><span><b>Model</b> = which AI tool makes that clip.</span><span><b>Quality score</b> = automatic check (0–100) for wrong product, odd hands or faces, unreadable text. <b>Fixed</b> means it failed once and was remade.</span></>}
       />
 
       <div className="row wrap" style={{ gap: 20, alignItems: 'flex-start' }}>
@@ -150,7 +140,7 @@ export default function Director() {
           </div>
 
           <div className="row wrap between" style={{ gap: 12 }}>
-            <Link className="btn" to="/product/formats">Back</Link>
+            <Link className="btn" to="/generate">Back to generate</Link>
             <Link className="btn primary" to="/product/review">Review 19 ready pieces <Icon.arrow /></Link>
           </div>
         </section>

@@ -8,8 +8,13 @@ Visionary Studios sells a done-for-you performance creative service to DTC (dire
 
 ## Who uses it
 
-- **Our team** (producers, editors, prompt specialists): create batches, review output, deliver to clients. Not all of them are technical; the tool must be usable without writing prompts.
+The tool mirrors how the team already splits the work. Each role sees its own home, sidebar and steps.
+
+- **Researcher** (e.g. David): decides which clients and products to take on, researches each product (brand kit, buyer research, hooks in the buyers' own words) and **hands it off** to an editor with a due date, priority, number of videos, suggested formats and a note. Watches the pipeline and each editor's workload.
+- **Editor / producer** (e.g. Renz, Arland, Jerome, Willem): receives researched products as **tasks**, so they start with full context. Generates videos in one click (picking a tested format or writing their own prompt), approves hooks, cores and CTAs, stitches ads, reviews them and sends them to the client. Fixes client change requests.
 - **Clients** (brand marketers): only see the client review page from a link. No login, no access to the rest of the tool.
+
+Not all of the team is technical; the tool must be usable without writing prompts.
 
 ## The problem it replaces
 
@@ -34,7 +39,9 @@ The previous internal tool (`vznry.com/app`) had the right ingredients (product 
 
 ## Success looks like
 
-- A non-technical team member can go from link to a reviewable batch without writing a prompt.
+- An editor never starts from a blank page: every task arrives with the research already done.
+- The researcher can see at a glance what is waiting, who is working on what, and who has room for more.
+- A non-technical editor can go from task to a reviewable batch without writing a prompt.
 - Most generated videos are good enough to keep on first review (target to set once we have real data).
 - Clients approve in one or two rounds.
 - The tool gets better over time from skip reasons, client feedback and ad performance.

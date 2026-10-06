@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 // Kinds of video a brief can be. Not a fixed list: people can add their own on the Brief screen.
@@ -9,16 +10,16 @@ const blankConcepts = [1, 2, 3, 4].map((n) => ({ id: 'c' + n, ep: `IDEA 0${n}`, 
 // Replace with saved briefs and team templates from the backend.
 export const EXAMPLES = {
   blank: {
-    sample: false, label: 'Blank brief',
-    client: 'New brief', dot: '#3A3A42',
-    name: 'Untitled brief', what: '', link: '', idea: '', format: '',
+    sample: false, label: 'Start from scratch',
+    client: 'New custom video', dot: '#3A3A42',
+    name: 'Untitled video', what: '', link: '', idea: '', format: '',
     style: 'ai', len: 30, place: 'end', must: '', avoid: '',
     beats: [['0–3s', 'Hook: the first line, written from your idea'], ['3–26s', 'Story: changes each episode'], ['26–30s', 'Promo: made once, reused']],
     next1: 'Facts and claims are pulled from the link, if you add one, and checked before use.',
     next3: 'You pick who or what appears, so every video looks like the same world.',
-    promo: 'Not written yet. Add what you are promoting on the brief.',
+    promo: 'Not written yet. Add what you are promoting on the idea step.',
     promoSlot: 'End · 26–30s',
-    conceptsTitle: 'Ideas', factsTitle: 'Fact check', factsAbout: 'Nothing to check yet. Facts appear here once the brief has a link or claims.',
+    conceptsTitle: 'Ideas', factsTitle: 'Fact check', factsAbout: 'Nothing to check yet. Facts appear here once the idea has a link or claims.',
     concepts: blankConcepts, defaultPicks: {}, facts: [], empty: true
   },
   dt: {
@@ -173,7 +174,7 @@ export function StartFrom({ value, onChange }) {
     <section className="stack" style={{ gap: 12 }}>
       <div className="row wrap between" style={{ gap: 8, alignItems: 'baseline' }}>
         <h2 className="h2">Start from</h2>
-        <span className="faint" style={{ fontSize: 13 }}>Samples just fill in the form so you can see a finished brief. Change anything.</span>
+        <span className="faint" style={{ fontSize: 13 }}>Samples just fill in the form so you can see a finished idea. Change anything.</span>
       </div>
       <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 100%), 1fr))', gap: 10 }}>
         {START_ORDER.map((id) => {
@@ -202,8 +203,8 @@ export function BriefSource({ exId }) {
   const ex = EXAMPLES[exId];
   return (
     <div className="row wrap" style={{ gap: 10 }}>
-      {ex.sample ? <span className="pill">Started from sample · {ex.label}</span> : <span className="pill lime">Your own brief</span>}
-      <Link to={`/briefs/new?ex=${exId}`} style={{ fontSize: 13, fontWeight: 500 }}>Edit brief</Link>
+      {ex.sample ? <span className="pill">Started from sample · {ex.label}</span> : <span className="pill lime">Your own idea</span>}
+      <Link to={`/custom/new?ex=${exId}`} style={{ fontSize: 13, fontWeight: 500 }}>Edit idea</Link>
     </div>
   );
 }
@@ -214,4 +215,28 @@ export function useExample() {
   const raw = params.get('ex');
   const id = raw && EXAMPLES[raw] ? raw : 'blank';
   return [id, (next) => setParams({ ex: next }, { replace: true })];
+}
+
+// Episodes picked (or written by the editor) for each starting point, shared by the Episodes, Look & cast and Generate steps.
+// In-memory only; replace with the saved custom video from the backend.
+const epState = {};
+const epListeners = new Set();
+const epGet = (id) => epState[id] || (epState[id] = { picks: { ...EXAMPLES[id].defaultPicks }, custom: [] });
+const epSet = (id, next) => { epState[id] = next; epListeners.forEach((l) => l()); };
+let epVersion = 0;
+const epSub = (l) => { const w = () => { epVersion++; l(); }; epListeners.add(w); return () => epListeners.delete(w); };
+
+export function useEpisodes(exId) {
+  useSyncExternalStore(epSub, () => epVersion);
+  const st = epGet(exId);
+  const all = [...st.custom, ...EXAMPLES[exId].concepts];
+  return {
+    all,
+    custom: st.custom,
+    picks: st.picks,
+    selected: all.filter((c) => st.picks[c.id]),
+    toggle: (cid) => epSet(exId, { ...st, picks: { ...st.picks, [cid]: !st.picks[cid] } }),
+    add: (ep) => epSet(exId, { custom: [ep, ...st.custom], picks: { ...st.picks, [ep.id]: true } }),
+    remove: (cid) => epSet(exId, { custom: st.custom.filter((c) => c.id !== cid), picks: { ...st.picks, [cid]: false } })
+  };
 }

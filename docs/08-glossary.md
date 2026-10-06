@@ -2,6 +2,12 @@
 
 | Term | Meaning |
 | --- | --- |
+| **Researcher** | Role that picks products and clients, researches each product and hands it to an editor. |
+| **Editor** | Role (also called producer) that gets tasks, generates and edits the videos, and sends them to the client. |
+| **Research package** | Everything the researcher found about a product (facts, buyer types, pinned hooks, rules, suggested formats), attached to the task. |
+| **Assign** (was *Hand off*) | Giving a researched product to an editor as a task. |
+| **Task** | One piece of work for one editor: a product or brief, a due date, a number of videos. Status: to do, in progress, changes requested, with client, approved. |
+| **Stitch** | Joining one approved hook, core and CTA into a finished ad. |
 | **DTC** | Direct-to-consumer brand that sells online. Our main client type. |
 | **Batch** | One generation run for a product or brief: a set of pieces made together. |
 | **Piece / clip** | One finished video (in one or more sizes). |
@@ -26,7 +32,8 @@
 | **Blank** | A `{word}` in a prompt template that the engine fills per product. |
 | **Locked line** | A prompt line starting with `!`; never changed by tweaks. |
 | **Tweak** | A per-product change the engine made to a custom prompt, shown with a reason. |
-| **Brief** | A plain-language description used to start ads that have no product page. |
+| **Custom video** (was *Brief*) | A video with no product page: the editor describes the idea and picks or writes episodes. |
+| **Episode** | One video in a custom-video series; suggested by the engine or written by the editor as a prompt. |
 | **Series** | A saved brief that keeps the character, look, promo and structure for one-click episodes. |
 | **Locked promo** | The promo segment in a brief, made once and reused unchanged in every episode. |
 | **Style frame** | A single still showing an animation's look before any video is made. |

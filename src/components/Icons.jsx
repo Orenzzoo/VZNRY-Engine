@@ -40,5 +40,14 @@ export const Icon = {
   user: (p) => <Svg size={16} sw={2} {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></Svg>,
   message: (p) => <Svg size={16} sw={2} {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Svg>,
   wand: (p) => <Svg size={16} sw={2} {...p}><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5" /></Svg>,
+  tasks: (p) => <Svg {...p}><rect x="5" y="4" width="14" height="17" rx="2.5" /><path d="M9 4V3h6v1" /><path d="M9 11l2 2 4-4" /><path d="M9 17h6" /></Svg>,
+  handoff: (p) => <Svg {...p}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 11-4.7" /><path d="M15 17h7M19 14l3 3-3 3" /></Svg>,
+  generate: (p) => <Svg {...p}><rect x="3" y="4" width="7" height="16" rx="2" /><rect x="14" y="4" width="7" height="16" rx="2" /><path d="M6.5 9.5v5M4 12h5" /></Svg>,
+  swap: (p) => <Svg size={16} sw={2} {...p}><path d="M7 4L3 8l4 4" /><path d="M3 8h13" /><path d="M17 20l4-4-4-4" /><path d="M21 16H8" /></Svg>,
+  pencil: (p) => <Svg size={14} sw={2} {...p}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></Svg>,
+  calendar: (p) => <Svg size={16} sw={2} {...p}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M8 3v4M16 3v4M3 10h18" /></Svg>,
+  minus: (p) => <Svg size={16} sw={2.4} {...p}><path d="M5 12h14" /></Svg>,
+  download: (p) => <Svg {...p}><path d="M12 4v12M7 11l5 5 5-5" /><path d="M4 20h16" /></Svg>,
+  publish: (p) => <Svg {...p}><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /><path d="M12 15V3M7 8l5-5 5 5" /></Svg>,
   hash: (p) => <Svg size={13} sw={2.2} {...p}><path d="M5 9h14M5 15h14M10 3L8 21M16 3l-2 18" /></Svg>
 };

@@ -18,10 +18,9 @@ export default function BugReport({ screen = 'this screen', channel = '#engine-b
 
   if (mode === 'closed') {
     return (
-      <button type="button" onClick={() => setMode('editing')} className="row" style={{ gap: 10, width: '100%', minHeight: 44, padding: '0 10px', borderRadius: 10, border: '1px dashed #3A3A42', background: 'transparent', color: '#C4C4CC', fontSize: 14, cursor: 'pointer', textAlign: 'left' }}>
-        <Icon.bug style={{ color: '#FCA5A5' }} />
-        <span style={{ flex: 1 }}>Report a bug</span>
-        <span className="faint" style={{ fontSize: 11 }}>to Slack</span>
+      <button type="button" onClick={() => setMode('editing')} className="nav" style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer', minHeight: 38, fontSize: 13 }}>
+        <Icon.bug size={16} />
+        <span style={{ flex: 1, textAlign: 'left' }}>Report a bug</span>
       </button>
     );
   }
